@@ -7,8 +7,11 @@ import {
   ShieldCheck, 
   Send, 
   Users,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import BRAND_INFO from '../data/brandInfo';
 import Button from '../components/ui/Button';
 import { countries } from '../data/countries';
@@ -147,6 +150,7 @@ export function TrainingRegistrationForm() {
     c.code.includes(countrySearchQuery)
   );
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionId, setSubmissionId] = useState('');
 
   const handleChange = (field, value) => {
@@ -191,13 +195,28 @@ export function TrainingRegistrationForm() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      const id = `SRI-ASSESS-${Math.floor(100000 + Math.random() * 900000)}`;
-      setSubmissionId(id);
-      setIsSubmitted(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setIsSubmitting(true);
+      try {
+        const id = `SRI-ASSESS-${Math.floor(100000 + Math.random() * 900000)}`;
+        
+        await addDoc(collection(db, "registrations"), {
+          ...formData,
+          submissionId: id,
+          submittedAt: serverTimestamp()
+        });
+
+        setSubmissionId(id);
+        setIsSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        console.error("Error saving form to Firebase:", error);
+        alert("There was an error saving your form. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       // Scroll to the first error
       window.scrollTo({ top: 120, behavior: 'smooth' });
@@ -1247,9 +1266,14 @@ export function TrainingRegistrationForm() {
                   variant="gold"
                   size="sm"
                   type="submit"
-                  className="w-auto shadow-soft hover:shadow-lg hover:scale-105 transition-all duration-300 font-bold px-8"
+                  disabled={isSubmitting}
+                  className="w-auto shadow-soft hover:shadow-lg hover:scale-105 transition-all duration-300 font-bold px-8 disabled:opacity-70 disabled:hover:scale-100"
                 >
-                  Submit
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</span>
+                  ) : (
+                    "Submit"
+                  )}
                 </Button>
               </div>
             </div>
