@@ -26,44 +26,6 @@ export function Navbar({ onOpenPortalModal }) {
 
   return (
     <>
-      {/* Top Announcement Bar */}
-      <div className="bg-gradient-to-r from-sridasi-forest via-sridasi-primary-800 to-sridasi-dark text-white text-[11px] py-1.5 px-4 font-medium border-b border-sridasi-primary-700/60 relative z-50">
-        <Container size="lg" className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 font-bold text-sridasi-yellow">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              Residential Training:
-            </span>
-            <span className="hidden sm:inline text-sridasi-primary-100">3-Day Integrated Natural Farming™ Course enrolling now</span>
-            <a 
-              href="/training-registration" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-sridasi-yellow hover:underline font-bold inline-flex items-center gap-0.5 ml-1"
-            >
-              Fill Assessment Form <ExternalLink className="w-2.5 h-2.5" />
-            </a>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => onOpenPortalModal('admin')}
-              className="hover:text-sridasi-yellow transition-colors flex items-center gap-1 font-semibold"
-            >
-              <Shield className="w-3 h-3 text-sridasi-yellow" />
-              <span>Admin Hub</span>
-            </button>
-            <span className="opacity-40">|</span>
-            <button
-              onClick={() => onOpenPortalModal('farmer')}
-              className="hover:text-sridasi-yellow transition-colors flex items-center gap-1 font-semibold"
-            >
-              <User className="w-3 h-3" />
-              <span>Farmer Sign-In</span>
-            </button>
-          </div>
-        </Container>
-      </div>
 
       {/* Main Sticky Navbar */}
       <header

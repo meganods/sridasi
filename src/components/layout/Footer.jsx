@@ -91,14 +91,19 @@ export function Footer({ onOpenConsultModal, onOpenPortalModal }) {
                 <Phone className="w-4 h-4 text-sridasi-leaf-400 shrink-0" />
                 <span>+91 (Farmer Helpdesk)</span>
               </li>
-              <li className="pt-2">
+              <li className="pt-2 flex flex-col gap-2">
                 <a
                   href="/training-registration"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full py-2 px-3 rounded-xl bg-sridasi-yellow text-sridasi-forest font-bold text-xs hover:bg-yellow-300 transition-colors text-center"
+                  className="block w-full py-2 px-3 rounded-xl bg-sridasi-yellow text-sridasi-forest font-bold text-xs hover:bg-yellow-300 transition-colors text-center shadow-soft"
                 >
-                  Register for Training
+                  Register (Farmer / Buyer)
+                </a>
+                <a
+                  href="/admin"
+                  className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-sridasi-primary-800/90 text-sridasi-leaf-200 hover:text-white hover:bg-sridasi-primary-700 font-semibold text-xs border border-sridasi-primary-600/80 transition-all text-center"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-sridasi-yellow" />
+                  Admin Dashboard Portal
                 </a>
               </li>
             </ul>
@@ -108,10 +113,17 @@ export function Footer({ onOpenConsultModal, onOpenPortalModal }) {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-sridasi-primary-300">
           <p>© {new Date().getFullYear()} SRIDASI Farms & Organics. All rights reserved.</p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-5">
             <a href="#about" className="hover:text-white transition-colors">Founder Blueprint</a>
             <a href="#calculator" className="hover:text-white transition-colors">Aqua ROI Calculator</a>
             <a href="#faq" className="hover:text-white transition-colors">Knowledge Base</a>
+            <a 
+              href="/admin" 
+              className="inline-flex items-center gap-1.5 text-sridasi-yellow hover:text-yellow-300 font-medium bg-sridasi-primary-800/80 px-2.5 py-1 rounded-lg border border-sridasi-primary-600/60 transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Admin Login
+            </a>
           </div>
         </div>
       </Container>
