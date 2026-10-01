@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Target the registrations collection
+    match /registrations/{document=**} {
+      // Allow anyone on the internet to submit registration forms
+      allow create: if true;
+      
+      // Allow read and delete so the admin portal can view dossiers and manage records
+      allow read, delete: if true;
+      
+      // Prevent arbitrary edits to historical submissions
+      allow update: if false;
+    }
+  }
+}

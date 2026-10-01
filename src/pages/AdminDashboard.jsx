@@ -437,6 +437,8 @@ export function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [userToDeleteModal, setUserToDeleteModal] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
 
   // Handle Login Authentication
@@ -651,73 +653,72 @@ export function AdminDashboard() {
     }
   };
 
-  // Permanently delete ONLY the specified registration
-  const handleDeleteUser = async (userToDelete, e) => {
+  // Trigger Professional Deletion Confirmation Modal
+  const handleRequestDelete = (user, e) => {
     if (e) e.stopPropagation();
-    if (!userToDelete) return;
+    setUserToDeleteModal(user);
+  };
 
-    const targetName = userToDelete.fullName || userToDelete.id;
-    const confirmMsg = `Are you sure you want to delete registration "${targetName}"?\n\nThis will remove only this registration from the directory table and Firebase database.`;
-    if (!window.confirm(confirmMsg)) {
-      return;
-    }
+  // Permanently delete ONLY the confirmed registration (Optimistic & Responsive)
+  const executeDeleteUser = async () => {
+    if (!userToDeleteModal) return;
+    const targetUser = userToDeleteModal;
+    setIsDeleting(true);
 
+    // 1. Immediately update UI state (instant response)
+    setUsers(prev => prev.filter(u => {
+      if (targetUser.id && u.id === targetUser.id) return false;
+      if (targetUser.docId && u.docId && u.docId === targetUser.docId) return false;
+      return true;
+    }));
+
+    // 2. Persist in deletedIds array
     try {
-      // 1. Delete from Firestore if docId exists
-      if (userToDelete.docId) {
-        try {
-          const colName = userToDelete.collection || 'registrations';
-          await deleteDoc(doc(db, colName, userToDelete.docId));
-        } catch (err) {
-          console.warn('Firestore doc delete:', err);
-        }
+      const rawDeleted = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
+      const deletedIds = Array.isArray(rawDeleted) ? rawDeleted.filter(id => Boolean(id) && typeof id === 'string') : [];
+      if (targetUser.id && typeof targetUser.id === 'string' && !deletedIds.includes(targetUser.id)) {
+        deletedIds.push(targetUser.id);
       }
+      if (targetUser.docId && typeof targetUser.docId === 'string' && !deletedIds.includes(targetUser.docId)) {
+        deletedIds.push(targetUser.docId);
+      }
+      localStorage.setItem('sridasi_deleted_ids', JSON.stringify(deletedIds));
+    } catch (e) {}
 
-      // 2. Remove from LocalStorage 'sridasi_registrations'
+    // 3. Remove from LocalStorage 'sridasi_registrations'
+    try {
       const localStr = localStorage.getItem('sridasi_registrations');
       if (localStr) {
-        try {
-          const list = JSON.parse(localStr);
-          const updated = list.filter(item => {
-            const itemId = item.submissionId || item.id;
-            if (userToDelete.id && itemId === userToDelete.id) return false;
-            if (userToDelete.docId && item.docId && item.docId === userToDelete.docId) return false;
-            return true;
-          });
-          localStorage.setItem('sridasi_registrations', JSON.stringify(updated));
-        } catch (e) {
-          console.error(e);
-        }
+        const list = JSON.parse(localStr);
+        const updated = list.filter(item => {
+          const itemId = item.submissionId || item.id;
+          if (targetUser.id && itemId === targetUser.id) return false;
+          if (targetUser.docId && item.docId && item.docId === targetUser.docId) return false;
+          return true;
+        });
+        localStorage.setItem('sridasi_registrations', JSON.stringify(updated));
       }
+    } catch (e) {}
 
-      // 3. Persist ID in deletedIds array
+    // 4. Close modal and drawer immediately
+    if (selectedUser && (selectedUser.id === targetUser.id || (selectedUser.docId && selectedUser.docId === targetUser.docId))) {
+      setIsDrawerOpen(false);
+      setSelectedUser(null);
+    }
+
+    setUserToDeleteModal(null);
+    setIsDeleting(false);
+
+    // 5. Cloud Firestore background delete (non-blocking)
+    if (targetUser.docId) {
       try {
-        const rawDeleted = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
-        const deletedIds = Array.isArray(rawDeleted) ? rawDeleted.filter(id => Boolean(id) && typeof id === 'string') : [];
-        if (userToDelete.id && typeof userToDelete.id === 'string' && !deletedIds.includes(userToDelete.id)) {
-          deletedIds.push(userToDelete.id);
-        }
-        if (userToDelete.docId && typeof userToDelete.docId === 'string' && !deletedIds.includes(userToDelete.docId)) {
-          deletedIds.push(userToDelete.docId);
-        }
-        localStorage.setItem('sridasi_deleted_ids', JSON.stringify(deletedIds));
-      } catch (e) {}
-
-      // 4. Update state directly (match only this specific record to remove)
-      setUsers(prev => prev.filter(u => {
-        if (userToDelete.id && u.id === userToDelete.id) return false;
-        if (userToDelete.docId && u.docId && u.docId === userToDelete.docId) return false;
-        return true;
-      }));
-
-      // 5. Close drawer if deleting currently viewed dossier
-      if (selectedUser && (selectedUser.id === userToDelete.id || (selectedUser.docId && selectedUser.docId === userToDelete.docId))) {
-        setIsDrawerOpen(false);
-        setSelectedUser(null);
+        const colName = targetUser.collection || 'registrations';
+        deleteDoc(doc(db, colName, targetUser.docId)).catch(err => {
+          console.warn('Firestore cloud delete sync note:', err);
+        });
+      } catch (err) {
+        console.warn('Firestore cloud delete trigger note:', err);
       }
-    } catch (err) {
-      console.error('Failed to delete registration:', err);
-      alert('Failed to delete registration. Please try again.');
     }
   };
 
@@ -1237,7 +1238,7 @@ export function AdminDashboard() {
                               <span className="whitespace-nowrap">View Dossier</span>
                             </button>
                             <button
-                              onClick={(e) => handleDeleteUser(farmer, e)}
+                              onClick={(e) => handleRequestDelete(farmer, e)}
                               className="p-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-all hover:scale-105 active:scale-95 cursor-pointer shrink-0"
                               title={`Delete registration ${farmer.id}`}
                             >
@@ -1369,7 +1370,7 @@ export function AdminDashboard() {
                               <span className="whitespace-nowrap">View Dossier</span>
                             </button>
                             <button
-                              onClick={(e) => handleDeleteUser(buyer, e)}
+                              onClick={(e) => handleRequestDelete(buyer, e)}
                               className="p-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-all hover:scale-105 active:scale-95 cursor-pointer shrink-0"
                               title={`Delete registration ${buyer.id}`}
                             >
@@ -1794,7 +1795,7 @@ export function AdminDashboard() {
                   Close Dossier
                 </Button>
                 <button
-                  onClick={(e) => handleDeleteUser(selectedUser, e)}
+                  onClick={(e) => handleRequestDelete(selectedUser, e)}
                   className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
                   title="Delete this registration record permanently"
                 >
@@ -1810,6 +1811,80 @@ export function AdminDashboard() {
                 leftIcon={<Printer className="w-4 h-4" />}
               >
                 Print / Save PDF
+              </Button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 7. PROFESSIONAL IN-APP DELETION CONFIRMATION MODAL                        */}
+      {/* ========================================================================= */}
+      {userToDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in no-print">
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-sridasi-neutral-200 animate-scale-up text-left space-y-5">
+            
+            {/* Header / Icon */}
+            <div className="flex items-start gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 shadow-soft-sm">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-heading font-extrabold text-lg text-sridasi-forest tracking-tight">
+                  Confirm Record Deletion
+                </h3>
+                <p className="text-xs text-sridasi-neutral-500 mt-0.5">
+                  Are you sure you want to permanently delete this registration?
+                </p>
+              </div>
+            </div>
+
+            {/* Target Information Card */}
+            <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-2 text-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-sridasi-neutral-200/80">
+                <span className="text-sridasi-neutral-500 font-semibold">Registrant Name:</span>
+                <span className="font-heading font-bold text-sridasi-forest text-sm">
+                  {userToDeleteModal.fullName || 'Unnamed Participant'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sridasi-neutral-500 font-semibold">Reference ID:</span>
+                <span className="font-mono font-bold text-sridasi-dark">{userToDeleteModal.id}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sridasi-neutral-500 font-semibold">Category:</span>
+                <span className="capitalize font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded border border-emerald-200 text-[11px]">
+                  {userToDeleteModal.role === 'buyer' ? '🛒 Commercial Buyer' : '🌾 Registered Farmer'}
+                </span>
+              </div>
+            </div>
+
+            {/* Professional Warning Box */}
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed font-medium">
+              ⚠️ This operation will permanently remove this dossier from the live directory and delete its record from the database. This action cannot be undone.
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-1">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isDeleting}
+                onClick={() => setUserToDeleteModal(null)}
+                className="font-semibold"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                disabled={isDeleting}
+                onClick={executeDeleteUser}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold border-red-600 shadow-soft hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{isDeleting ? 'Deleting...' : 'Permanently Delete'}</span>
               </Button>
             </div>
 
