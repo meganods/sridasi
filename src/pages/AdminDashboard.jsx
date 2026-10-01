@@ -27,10 +27,11 @@ import {
   DollarSign,
   Compass,
   Layers,
-  CheckSquare
+  CheckSquare,
+  Trash2
 } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import BRAND_INFO from '../data/brandInfo';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -558,23 +559,86 @@ export function AdminDashboard() {
         }
       }
 
+      // Read list of deleted IDs to persist deletions across sessions
+      const deletedIds = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
+
       // Merge avoiding duplicates by ID
       const combined = [...firestoreData, ...localData, ...SEED_USERS];
-      const unique = Array.from(new Map(combined.map(item => [item.id || item.mobileNumber, item])).values());
+      const unique = Array.from(new Map(combined.map(item => [item.id || item.mobileNumber, item])).values())
+        .filter(item => !deletedIds.includes(item.id) && !deletedIds.includes(item.docId));
       allRecords = unique;
     } catch (err) {
       console.warn("Using offline & local registration data:", err);
+      const deletedIds = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
       const localStr = localStorage.getItem('sridasi_registrations');
       if (localStr) {
         try {
           const localData = JSON.parse(localStr);
-          allRecords = [...localData, ...SEED_USERS];
+          allRecords = [...localData, ...SEED_USERS].filter(item => !deletedIds.includes(item.id) && !deletedIds.includes(item.docId));
         } catch (e) {}
       }
     }
 
     setUsers(allRecords);
     setLoading(false);
+  };
+
+  // Permanently delete a registration
+  const handleDeleteUser = async (userToDelete, e) => {
+    if (e) e.stopPropagation();
+    if (!userToDelete) return;
+
+    const confirmMsg = `Are you sure you want to delete registration "${userToDelete.fullName || userToDelete.id}"?\n\nThis will remove the registration from the directory table and local cache.`;
+    if (!window.confirm(confirmMsg)) {
+      return;
+    }
+
+    try {
+      // 1. Delete from Firestore if docId exists
+      if (userToDelete.docId) {
+        try {
+          await deleteDoc(doc(db, 'registrations', userToDelete.docId));
+        } catch (err) {
+          console.warn('Firestore doc delete:', err);
+        }
+      }
+
+      // 2. Remove from LocalStorage 'sridasi_registrations'
+      const localStr = localStorage.getItem('sridasi_registrations');
+      if (localStr) {
+        try {
+          const list = JSON.parse(localStr);
+          const updated = list.filter(item => (item.submissionId || item.id) !== userToDelete.id && item.docId !== userToDelete.docId);
+          localStorage.setItem('sridasi_registrations', JSON.stringify(updated));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // 3. Persist ID in deletedIds array
+      try {
+        const deletedIds = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
+        if (userToDelete.id && !deletedIds.includes(userToDelete.id)) {
+          deletedIds.push(userToDelete.id);
+        }
+        if (userToDelete.docId && !deletedIds.includes(userToDelete.docId)) {
+          deletedIds.push(userToDelete.docId);
+        }
+        localStorage.setItem('sridasi_deleted_ids', JSON.stringify(deletedIds));
+      } catch (e) {}
+
+      // 4. Update state directly
+      setUsers(prev => prev.filter(u => u.id !== userToDelete.id && u.docId !== userToDelete.docId));
+
+      // 5. Close drawer if deleting currently viewed dossier
+      if (selectedUser && (selectedUser.id === userToDelete.id || selectedUser.docId === userToDelete.docId)) {
+        setIsDrawerOpen(false);
+        setSelectedUser(null);
+      }
+    } catch (err) {
+      console.error('Failed to delete registration:', err);
+      alert('Failed to delete registration. Please try again.');
+    }
   };
 
   useEffect(() => {
@@ -1086,16 +1150,26 @@ export function AdminDashboard() {
 
                         {/* Action */}
                         <td className="py-4 px-4 text-right align-middle">
-                          <button
-                            onClick={() => {
-                              setSelectedUser(farmer);
-                              setIsDrawerOpen(true);
-                            }}
-                            className="px-3.5 py-2 rounded-xl bg-sridasi-forest hover:bg-sridasi-dark text-white font-bold text-xs shadow-soft-sm transition-all inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span className="whitespace-nowrap">View Dossier</span>
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedUser(farmer);
+                                setIsDrawerOpen(true);
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-sridasi-forest hover:bg-sridasi-dark text-white font-bold text-xs shadow-soft-sm transition-all inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                              title="View full assessment dossier"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span className="whitespace-nowrap">View Dossier</span>
+                            </button>
+                            <button
+                              onClick={(e) => handleDeleteUser(farmer, e)}
+                              className="p-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-all hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+                              title={`Delete registration ${farmer.id}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -1208,16 +1282,26 @@ export function AdminDashboard() {
 
                         {/* Action */}
                         <td className="py-4 px-4 text-right align-middle">
-                          <button
-                            onClick={() => {
-                              setSelectedUser(buyer);
-                              setIsDrawerOpen(true);
-                            }}
-                            className="px-3.5 py-2 rounded-xl bg-sridasi-forest hover:bg-sridasi-dark text-white font-bold text-xs shadow-soft-sm transition-all inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span className="whitespace-nowrap">View Dossier</span>
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedUser(buyer);
+                                setIsDrawerOpen(true);
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-sridasi-forest hover:bg-sridasi-dark text-white font-bold text-xs shadow-soft-sm transition-all inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                              title="View full registration dossier"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span className="whitespace-nowrap">View Dossier</span>
+                            </button>
+                            <button
+                              onClick={(e) => handleDeleteUser(buyer, e)}
+                              className="p-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-all hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+                              title={`Delete registration ${buyer.id}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -1626,14 +1710,25 @@ export function AdminDashboard() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-6 border-t border-sridasi-neutral-200 bg-sridasi-surface flex items-center justify-between no-print">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsDrawerOpen(false)}
-              >
-                Close Dossier
-              </Button>
+            <div className="p-6 border-t border-sridasi-neutral-200 bg-sridasi-surface flex items-center justify-between no-print gap-3">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsDrawerOpen(false)}
+                >
+                  Close Dossier
+                </Button>
+                <button
+                  onClick={(e) => handleDeleteUser(selectedUser, e)}
+                  className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                  title="Delete this registration record permanently"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Record</span>
+                </button>
+              </div>
+              
               <Button
                 variant="gold"
                 size="sm"
