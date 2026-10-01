@@ -31,7 +31,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import BRAND_INFO from '../data/brandInfo';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -457,7 +457,7 @@ export function AdminDashboard() {
         sessionStorage.setItem('sridasi_admin_auth', 'true');
         setAuthError('');
       } else {
-        setAuthError('Invalid Admin ID or Password. (Default: ID: admin | Pass: admin)');
+        setAuthError('Invalid Admin ID or Password. Please verify your credentials.');
       }
       setIsSubmittingAuth(false);
     }, 300);
@@ -479,116 +479,185 @@ export function AdminDashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch from Firebase and LocalStorage
-  const fetchRegistrations = async () => {
-    setLoading(true);
-    let allRecords = [...SEED_USERS];
+  // Candidate Firestore collections to auto-detect all users
+  const FIREBASE_COLLECTIONS = ['registrations', 'training_registrations', 'farmers', 'buyers', 'users', 'farmer_registrations', 'buyer_registrations'];
 
-    try {
-      // 1. Try Firebase Firestore
-      const q = query(collection(db, 'registrations'), orderBy('submittedAt', 'desc'));
-      const snapshot = await getDocs(q);
-      const firestoreData = snapshot.docs.map(doc => {
-        const d = doc.data();
-        const dateObj = d.submittedAt?.toDate ? d.submittedAt.toDate() : new Date();
-        return {
-          id: d.submissionId || doc.id,
-          docId: doc.id,
-          role: d.role || (d.businessType || d.companyName ? 'buyer' : 'farmer'),
-          fullName: d.fullName || '',
-          qualification: d.qualification || '',
-          preferredLanguage: d.preferredLanguage || '',
-          countryCode: d.countryCode || '+91',
-          mobileNumber: d.mobileNumber || '',
-          emailId: d.emailId || '',
-          completeAddress: d.completeAddress || '',
-          currentOccupation: d.currentOccupation || '',
-          challenges: d.challenges || {},
-          interestReason: d.interestReason || '',
-          totalLand: d.totalLand || '',
-          landUnit: d.landUnit || 'Acres',
-          landUsedForFarming: d.landUsedForFarming || '',
-          landType: d.landType || '',
-          waterSources: d.waterSources || {},
-          borewellElectricity: d.borewellElectricity || '',
-          borewellSize: d.borewellSize || '',
-          electricityHours: d.electricityHours || '',
-          villageTown: d.villageTown || '',
-          district: d.district || '',
-          state: d.state || '',
-          distanceMainRoad: d.distanceMainRoad || '',
-          distanceMarket: d.distanceMarket || '',
-          predatorsWildAnimals: d.predatorsWildAnimals || '',
-          predatorsSpecify: d.predatorsSpecify || '',
-          theftTrespassing: d.theftTrespassing || '',
-          theftExplain: d.theftExplain || '',
-          farmProtection: d.farmProtection || '',
-          infraStore: d.infraStore || '',
-          infraSupplies: d.infraSupplies || '',
-          infraOffice: d.infraOffice || '',
-          otherExistingInfra: d.otherExistingInfra || '',
-          transport: d.transport || {},
-          distanceAllWeatherRoad: d.distanceAllWeatherRoad || '',
-          distanceNearestMarket: d.distanceNearestMarket || '',
-          approxAnnualIncome: d.approxAnnualIncome || '',
-          farmingAnnualIncome: d.farmingAnnualIncome || '',
-          approxInvestmentAvailable: d.approxInvestmentAvailable || '',
-          readyToInvest: d.readyToInvest || '',
-          activitiesInterest: d.activitiesInterest || {},
-          activityToDevelopFirst: d.activityToDevelopFirst || '',
-          hasPriorExperience: d.hasPriorExperience || '',
-          priorExperienceDesc: d.priorExperienceDesc || '',
-          dailyTimeHours: d.dailyTimeHours || '',
-          staffAvailability: d.staffAvailability || '',
-          hasFarmManager: d.hasFarmManager || '',
-          farmAtAGlance: d.farmAtAGlance || {},
-          submittedAtStr: dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          timestamp: dateObj,
-          rawFormData: d
-        };
-      });
+  // Helper to map and normalize raw registration records from any Firestore collection
+  const mapRecord = (d, docId, colName = 'registrations') => {
+    const dateObj = d.submittedAt?.toDate 
+      ? d.submittedAt.toDate() 
+      : (d.timestamp ? new Date(d.timestamp) : (d.createdAt?.toDate ? d.createdAt.toDate() : new Date()));
 
-      // 2. Read LocalStorage fallbacks
-      const localStr = localStorage.getItem('sridasi_registrations');
-      let localData = [];
-      if (localStr) {
-        try {
-          localData = JSON.parse(localStr);
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    // Auto-detect role
+    let detectedRole = 'farmer';
+    if (colName === 'buyers' || colName === 'buyer_registrations') {
+      detectedRole = 'buyer';
+    } else if (d.role) {
+      detectedRole = d.role.toLowerCase().includes('buy') ? 'buyer' : 'farmer';
+    } else if (d.businessType || d.companyName || d.targetCommodity) {
+      detectedRole = 'buyer';
+    }
 
-      // Read list of deleted IDs to persist deletions across sessions
-      const deletedIds = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
+    return {
+      id: d.submissionId || d.id || docId,
+      docId: docId || d.docId,
+      collection: colName,
+      role: detectedRole,
+      fullName: d.fullName || d.name || d.farmerName || d.buyerName || '',
+      qualification: d.qualification || '',
+      preferredLanguage: d.preferredLanguage || '',
+      countryCode: d.countryCode || '+91',
+      mobileNumber: d.mobileNumber || d.phone || d.mobile || '',
+      emailId: d.emailId || d.email || '',
+      completeAddress: d.completeAddress || d.address || '',
+      currentOccupation: d.currentOccupation || d.occupation || '',
+      challenges: d.challenges || {},
+      interestReason: d.interestReason || d.reason || '',
+      totalLand: d.totalLand || d.land || '',
+      landUnit: d.landUnit || 'Acres',
+      landUsedForFarming: d.landUsedForFarming || d.farmingLand || '',
+      landType: d.landType || '',
+      waterSources: d.waterSources || {},
+      borewellElectricity: d.borewellElectricity || '',
+      borewellSize: d.borewellSize || '',
+      electricityHours: d.electricityHours || '',
+      villageTown: d.villageTown || d.village || d.city || '',
+      district: d.district || '',
+      state: d.state || '',
+      distanceMainRoad: d.distanceMainRoad || '',
+      distanceMarket: d.distanceMarket || '',
+      predatorsWildAnimals: d.predatorsWildAnimals || '',
+      predatorsSpecify: d.predatorsSpecify || '',
+      theftTrespassing: d.theftTrespassing || '',
+      theftExplain: d.theftExplain || '',
+      farmProtection: d.farmProtection || '',
+      infraStore: d.infraStore || '',
+      infraSupplies: d.infraSupplies || '',
+      infraOffice: d.infraOffice || '',
+      otherExistingInfra: d.otherExistingInfra || '',
+      transport: d.transport || {},
+      distanceAllWeatherRoad: d.distanceAllWeatherRoad || '',
+      distanceNearestMarket: d.distanceNearestMarket || '',
+      approxAnnualIncome: d.approxAnnualIncome || d.annualIncome || '',
+      farmingAnnualIncome: d.farmingAnnualIncome || '',
+      approxInvestmentAvailable: d.approxInvestmentAvailable || d.investmentBudget || '',
+      readyToInvest: d.readyToInvest || '',
+      activitiesInterest: d.activitiesInterest || {},
+      activityToDevelopFirst: d.activityToDevelopFirst || d.primaryInterest || '',
+      hasPriorExperience: d.hasPriorExperience || '',
+      priorExperienceDesc: d.priorExperienceDesc || d.experience || '',
+      dailyTimeHours: d.dailyTimeHours || '',
+      staffAvailability: d.staffAvailability || '',
+      hasFarmManager: d.hasFarmManager || '',
+      farmAtAGlance: d.farmAtAGlance || {},
+      submittedAtStr: d.submittedAtStr || (dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
+      timestamp: dateObj,
+      rawFormData: d
+    };
+  };
 
-      // Merge avoiding duplicates by ID
-      const combined = [...firestoreData, ...localData, ...SEED_USERS];
-      const unique = Array.from(new Map(combined.map(item => [item.id || item.mobileNumber, item])).values())
-        .filter(item => !deletedIds.includes(item.id) && !deletedIds.includes(item.docId));
-      allRecords = unique;
-    } catch (err) {
-      console.warn("Using offline & local registration data:", err);
-      const deletedIds = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
-      const localStr = localStorage.getItem('sridasi_registrations');
-      if (localStr) {
-        try {
-          const localData = JSON.parse(localStr);
-          allRecords = [...localData, ...SEED_USERS].filter(item => !deletedIds.includes(item.id) && !deletedIds.includes(item.docId));
-        } catch (e) {}
+  // Merge and deduplicate datasets
+  const combineDatasets = (firestoreList = []) => {
+    const rawDeleted = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
+    const deletedIds = Array.isArray(rawDeleted) ? rawDeleted.filter(id => Boolean(id) && typeof id === 'string') : [];
+
+    const isDeleted = (item) => {
+      if (item.id && deletedIds.includes(item.id)) return true;
+      if (item.docId && deletedIds.includes(item.docId)) return true;
+      return false;
+    };
+
+    const localStr = localStorage.getItem('sridasi_registrations');
+    let localData = [];
+    if (localStr) {
+      try {
+        const raw = JSON.parse(localStr);
+        localData = (Array.isArray(raw) ? raw : []).map(item => mapRecord(item, item.docId, 'local'));
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    setUsers(allRecords);
+    const combined = [...firestoreList, ...localData, ...SEED_USERS];
+    const unique = Array.from(new Map(combined.map(item => [item.id || item.mobileNumber, item])).values())
+      .filter(item => !isDeleted(item));
+
+    setUsers(unique);
     setLoading(false);
   };
 
-  // Permanently delete a registration
+  // Real-time Database Subscription across all collections
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    setLoading(true);
+    const firestoreCollectionsCache = {};
+
+    const updateAll = () => {
+      const allFirestore = Object.values(firestoreCollectionsCache).flat();
+      combineDatasets(allFirestore);
+    };
+
+    // Listen to all candidate collections in real-time
+    const unsubs = FIREBASE_COLLECTIONS.map(colName => {
+      try {
+        const colRef = collection(db, colName);
+        return onSnapshot(colRef, (snapshot) => {
+          firestoreCollectionsCache[colName] = snapshot.docs.map(doc => mapRecord(doc.data(), doc.id, colName));
+          updateAll();
+        }, (err) => {
+          // If collection doesn't exist yet, silently ignore
+          firestoreCollectionsCache[colName] = [];
+          updateAll();
+        });
+      } catch (e) {
+        return () => {};
+      }
+    });
+
+    // Real-time cross-tab Storage listener (for same browser / tabs)
+    const handleStorageChange = (e) => {
+      if (e.key === 'sridasi_registrations' || e.key === 'sridasi_deleted_ids') {
+        updateAll();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      unsubs.forEach(unsub => typeof unsub === 'function' && unsub());
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [isAuthenticated]);
+
+  // Manual Refresh Handler across all collections
+  const fetchRegistrations = async () => {
+    setLoading(true);
+    try {
+      const results = await Promise.allSettled(
+        FIREBASE_COLLECTIONS.map(async (colName) => {
+          const snapshot = await getDocs(collection(db, colName));
+          return snapshot.docs.map(doc => mapRecord(doc.data(), doc.id, colName));
+        })
+      );
+
+      const allFirestore = results
+        .filter(r => r.status === 'fulfilled')
+        .flatMap(r => r.value);
+
+      combineDatasets(allFirestore);
+    } catch (err) {
+      console.warn("Using offline & local registration data:", err);
+      combineDatasets([]);
+    }
+  };
+
+  // Permanently delete ONLY the specified registration
   const handleDeleteUser = async (userToDelete, e) => {
     if (e) e.stopPropagation();
     if (!userToDelete) return;
 
-    const confirmMsg = `Are you sure you want to delete registration "${userToDelete.fullName || userToDelete.id}"?\n\nThis will remove the registration from the directory table and local cache.`;
+    const targetName = userToDelete.fullName || userToDelete.id;
+    const confirmMsg = `Are you sure you want to delete registration "${targetName}"?\n\nThis will remove only this registration from the directory table and Firebase database.`;
     if (!window.confirm(confirmMsg)) {
       return;
     }
@@ -597,7 +666,8 @@ export function AdminDashboard() {
       // 1. Delete from Firestore if docId exists
       if (userToDelete.docId) {
         try {
-          await deleteDoc(doc(db, 'registrations', userToDelete.docId));
+          const colName = userToDelete.collection || 'registrations';
+          await deleteDoc(doc(db, colName, userToDelete.docId));
         } catch (err) {
           console.warn('Firestore doc delete:', err);
         }
@@ -608,7 +678,12 @@ export function AdminDashboard() {
       if (localStr) {
         try {
           const list = JSON.parse(localStr);
-          const updated = list.filter(item => (item.submissionId || item.id) !== userToDelete.id && item.docId !== userToDelete.docId);
+          const updated = list.filter(item => {
+            const itemId = item.submissionId || item.id;
+            if (userToDelete.id && itemId === userToDelete.id) return false;
+            if (userToDelete.docId && item.docId && item.docId === userToDelete.docId) return false;
+            return true;
+          });
           localStorage.setItem('sridasi_registrations', JSON.stringify(updated));
         } catch (e) {
           console.error(e);
@@ -617,21 +692,26 @@ export function AdminDashboard() {
 
       // 3. Persist ID in deletedIds array
       try {
-        const deletedIds = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
-        if (userToDelete.id && !deletedIds.includes(userToDelete.id)) {
+        const rawDeleted = JSON.parse(localStorage.getItem('sridasi_deleted_ids') || '[]');
+        const deletedIds = Array.isArray(rawDeleted) ? rawDeleted.filter(id => Boolean(id) && typeof id === 'string') : [];
+        if (userToDelete.id && typeof userToDelete.id === 'string' && !deletedIds.includes(userToDelete.id)) {
           deletedIds.push(userToDelete.id);
         }
-        if (userToDelete.docId && !deletedIds.includes(userToDelete.docId)) {
+        if (userToDelete.docId && typeof userToDelete.docId === 'string' && !deletedIds.includes(userToDelete.docId)) {
           deletedIds.push(userToDelete.docId);
         }
         localStorage.setItem('sridasi_deleted_ids', JSON.stringify(deletedIds));
       } catch (e) {}
 
-      // 4. Update state directly
-      setUsers(prev => prev.filter(u => u.id !== userToDelete.id && u.docId !== userToDelete.docId));
+      // 4. Update state directly (match only this specific record to remove)
+      setUsers(prev => prev.filter(u => {
+        if (userToDelete.id && u.id === userToDelete.id) return false;
+        if (userToDelete.docId && u.docId && u.docId === userToDelete.docId) return false;
+        return true;
+      }));
 
       // 5. Close drawer if deleting currently viewed dossier
-      if (selectedUser && (selectedUser.id === userToDelete.id || selectedUser.docId === userToDelete.docId)) {
+      if (selectedUser && (selectedUser.id === userToDelete.id || (selectedUser.docId && selectedUser.docId === userToDelete.docId))) {
         setIsDrawerOpen(false);
         setSelectedUser(null);
       }
@@ -692,7 +772,7 @@ export function AdminDashboard() {
                   required
                   value={adminId}
                   onChange={(e) => setAdminId(e.target.value)}
-                  placeholder="Enter Admin ID (e.g. admin)"
+                  placeholder="Enter Admin ID"
                   className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-sridasi-yellow focus:ring-1 focus:ring-sridasi-yellow text-sm transition-all"
                 />
                 <ShieldCheck className="w-4 h-4 text-sridasi-yellow absolute left-3.5 top-3.5" />
@@ -722,12 +802,6 @@ export function AdminDashboard() {
                   <Eye className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-
-            {/* Hint Box */}
-            <div className="p-2.5 rounded-xl bg-sridasi-forest/60 border border-sridasi-primary-700/60 text-[11px] text-sridasi-leaf-200 flex items-center justify-between">
-              <span>Credentials:</span>
-              <span className="font-mono font-bold text-sridasi-yellow">ID: admin • Pass: admin</span>
             </div>
 
             {/* Submit Button */}
