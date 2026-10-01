@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-forest: #0B5D45;
+    --color-dark: #126B4F;
+    --color-green: #4F9D39;
+    --color-water: #3FA9D8;
+    --color-yellow: #F4C63D;
+    --color-cream: #FFF9E8;
+    --color-white: #FFFFFF;
+    --color-surface: #F4F7F4;
+    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    color: #1A211A;
+    background-color: var(--color-surface);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  /* Glassmorphic Surfaces */
+  .sridasi-glass {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .sridasi-glass-dark {
+    background: rgba(11, 93, 69, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .sridasi-glass-subtle {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(18, 107, 79, 0.08);
+  }
+
+  /* Gradient Text Styles */
+  .sridasi-gradient-text-forest {
+    background: linear-gradient(135deg, #0B5D45 0%, #126B4F 50%, #4F9D39 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sridasi-gradient-text-gold {
+    background: linear-gradient(135deg, #F4C63D 0%, #D4A01D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sridasi-gradient-text-water {
+    background: linear-gradient(135deg, #3FA9D8 0%, #126B4F 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Ambient Mesh Backgrounds */
+  .sridasi-ambient-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sridasi-ambient-glow::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -5%;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(79, 157, 57, 0.12) 0%, rgba(63, 169, 216, 0.06) 50%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .sridasi-ambient-glow::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    left: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(11, 93, 69, 0.08) 0%, rgba(244, 198, 61, 0.06) 50%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+/* Custom modern scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4F7F4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ADDDCF;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #126B4F;
+}
