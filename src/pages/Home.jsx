@@ -4,6 +4,7 @@ import Footer from '../components/layout/Footer';
 import { 
   Hero, 
   TrainingProgramSection,
+  TrainingGallery,
   FarmerAppStudio, 
   ProductsShowcase, 
   IntegratedEcosystem, 
@@ -39,6 +40,9 @@ export function Home() {
 
         {/* 2. 100 Times More Profitable Integrated Natural Farming™ & 3-Day Residential Training */}
         <TrainingProgramSection />
+
+        {/* 2b. Live Residential Training Glimpses & Real Trainee Photos */}
+        <TrainingGallery />
 
         {/* 3. Interactive Farmer App & Admin Control Hub (Version 1 Workflow) */}
         <FarmerAppStudio />

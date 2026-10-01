@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Sprout, ArrowRight, Shield, User, Sparkles, GraduationCap, ExternalLink, FileText } from 'lucide-react';
-import Button from '../ui/Button';
+import { Menu, X, Sprout, Shield, User, ExternalLink, FileText } from 'lucide-react';
 import Container from '../ui/Container';
 
 export function Navbar({ onOpenPortalModal }) {
@@ -27,7 +26,7 @@ export function Navbar({ onOpenPortalModal }) {
 
   return (
     <>
-      {/* Top Announcement & Emergency Aqua Bar */}
+      {/* Top Announcement Bar */}
       <div className="bg-gradient-to-r from-sridasi-forest via-sridasi-primary-800 to-sridasi-dark text-white text-[11px] py-1.5 px-4 font-medium border-b border-sridasi-primary-700/60 relative z-50">
         <Container size="lg" className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -66,19 +65,18 @@ export function Navbar({ onOpenPortalModal }) {
         </Container>
       </div>
 
-      {/* Main Sticky Header */}
-      <div className="fixed top-[29px] left-0 right-0 z-40 pt-4 pointer-events-none flex justify-center w-full">
-        <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <header
-            className={`relative w-full transition-all duration-300 pointer-events-auto rounded-full border backdrop-blur-md shadow-soft-lg ${
-              isScrolled
-                ? 'py-2.5 px-5 md:px-8 bg-white/60 border-white/50 shadow-lg'
-                : 'py-3.5 px-5 md:px-8 bg-white/30 border-white/40'
-            }`}
-          >
-            <div className="flex items-center justify-between">
+      {/* Main Sticky Navbar */}
+      <header
+        className={`sticky top-0 left-0 right-0 z-40 w-full transition-all duration-200 border-b ${
+          isScrolled
+            ? 'bg-white/95 backdrop-blur-md border-sridasi-neutral-200/90 shadow-soft'
+            : 'bg-white/90 backdrop-blur-md border-sridasi-neutral-200/60 shadow-soft-sm'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between">
             {/* Brand Logo */}
-            <a href="/" className="flex items-center gap-3 group">
+            <a href="/" className="flex items-center gap-3 group shrink-0">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sridasi-forest to-sridasi-green flex items-center justify-center text-white shadow-soft transition-transform duration-300 group-hover:scale-105">
                 <Sprout className="w-5 h-5 text-sridasi-yellow" />
               </div>
@@ -93,12 +91,12 @@ export function Navbar({ onOpenPortalModal }) {
             </a>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-1 px-3 py-1 rounded-full bg-white/40 border border-white/50 shadow-soft-sm backdrop-blur-sm">
+            <nav className="hidden xl:flex items-center gap-1 px-3 py-1 rounded-full bg-sridasi-surface border border-sridasi-neutral-200/80 shadow-soft-sm">
               {navLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-sridasi-forest hover:bg-white/60 rounded-full transition-all duration-200"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-sridasi-forest hover:bg-white hover:text-sridasi-green rounded-full transition-all duration-200"
                 >
                   {link.label}
                 </a>
@@ -106,7 +104,7 @@ export function Navbar({ onOpenPortalModal }) {
             </nav>
 
             {/* CTA & Actions */}
-            <div className="hidden md:flex items-center gap-2.5">
+            <div className="hidden md:flex items-center gap-2.5 shrink-0">
               <a
                 href="/training-registration"
                 target="_blank"
@@ -122,7 +120,7 @@ export function Navbar({ onOpenPortalModal }) {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded-xl text-sridasi-forest hover:bg-white/50 transition-colors"
+              className="xl:hidden p-2 rounded-xl text-sridasi-forest hover:bg-sridasi-surface transition-colors"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -131,37 +129,37 @@ export function Navbar({ onOpenPortalModal }) {
 
           {/* Mobile Dropdown Menu */}
           {mobileMenuOpen && (
-            <div className="xl:hidden absolute top-full left-0 right-0 mt-3 p-5 rounded-3xl bg-white/80 backdrop-blur-xl shadow-soft-lg border border-white/50 animate-slide-up text-left">
-              <div className="flex flex-col space-y-2">
+            <div className="xl:hidden mt-3 p-4 rounded-2xl bg-white shadow-soft-lg border border-sridasi-neutral-200 animate-slide-up text-left">
+              <div className="flex flex-col space-y-1">
                 {navLinks.map((link) => (
                   <a
                     key={link.label}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-3.5 py-2 text-xs font-bold text-sridasi-forest hover:bg-white/60 rounded-xl transition-colors"
+                    className="px-3.5 py-2 text-xs font-bold text-sridasi-forest hover:bg-sridasi-surface rounded-xl transition-colors"
                   >
                     {link.label}
                   </a>
                 ))}
                 
-                <div className="pt-3 border-t border-white/40 flex flex-col gap-2">
+                <div className="pt-3 border-t border-sridasi-neutral-200 flex flex-col gap-2">
                   <a
                     href="/training-registration"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-xl bg-sridasi-forest text-white font-heading font-bold text-xs text-center flex items-center justify-center gap-1.5 shadow-soft"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-sridasi-forest hover:bg-sridasi-dark shadow-soft-sm transition-all flex items-center justify-center gap-2"
                   >
                     <FileText className="w-4 h-4 text-sridasi-yellow" />
-                    <span>Registration Form</span>
+                    <span>Open Registration Form</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
               </div>
             </div>
           )}
-        </header>
         </div>
-      </div>
+      </header>
     </>
   );
 }

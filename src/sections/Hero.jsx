@@ -75,7 +75,7 @@ export function Hero() {
   const CycleIcon = currentCycle.icon;
 
   return (
-    <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden bg-gradient-to-b from-sridasi-primary-50/60 via-sridasi-surface to-sridasi-surface">
+    <section className="relative pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-b from-sridasi-primary-50/60 via-sridasi-surface to-sridasi-surface">
       {/* Background Decorative Bio-Light Flares */}
       <div className="absolute top-10 left-1/4 w-96 h-96 bg-sridasi-water/15 rounded-full blur-3xl pointer-events-none -z-0" />
       <div className="absolute top-40 right-10 w-96 h-96 bg-sridasi-green/15 rounded-full blur-3xl pointer-events-none -z-0" />
