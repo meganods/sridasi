@@ -67,15 +67,16 @@ export function Navbar({ onOpenPortalModal }) {
       </div>
 
       {/* Main Sticky Header */}
-      <header
-        className={`fixed top-[29px] left-0 right-0 z-40 transition-all duration-300 ${
-          isScrolled
-            ? 'py-2.5 bg-white/95 backdrop-blur-md shadow-soft border-b border-sridasi-neutral-200'
-            : 'py-4 bg-white/70 backdrop-blur-sm'
-        }`}
-      >
-        <Container size="lg">
-          <div className="flex items-center justify-between">
+      <div className="fixed top-[29px] left-0 right-0 z-40 pt-4 pointer-events-none flex justify-center w-full">
+        <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <header
+            className={`relative w-full transition-all duration-300 pointer-events-auto rounded-full border backdrop-blur-md shadow-soft-lg ${
+              isScrolled
+                ? 'py-2.5 px-5 md:px-8 bg-white/60 border-white/50 shadow-lg'
+                : 'py-3.5 px-5 md:px-8 bg-white/30 border-white/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
             {/* Brand Logo */}
             <a href="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sridasi-forest to-sridasi-green flex items-center justify-center text-white shadow-soft transition-transform duration-300 group-hover:scale-105">
@@ -92,12 +93,12 @@ export function Navbar({ onOpenPortalModal }) {
             </a>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-1 px-3 py-1 rounded-full bg-sridasi-surface border border-sridasi-neutral-200/90 shadow-soft-sm">
+            <nav className="hidden xl:flex items-center gap-1 px-3 py-1 rounded-full bg-white/40 border border-white/50 shadow-soft-sm backdrop-blur-sm">
               {navLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
-                  className="px-3.5 py-1.5 text-xs font-medium text-sridasi-neutral-700 hover:text-sridasi-forest hover:bg-white rounded-full transition-all duration-200"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-sridasi-forest hover:bg-white/60 rounded-full transition-all duration-200"
                 >
                   {link.label}
                 </a>
@@ -121,7 +122,7 @@ export function Navbar({ onOpenPortalModal }) {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded-xl text-sridasi-forest hover:bg-sridasi-primary-50 transition-colors"
+              className="xl:hidden p-2 rounded-xl text-sridasi-forest hover:bg-white/50 transition-colors"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -130,20 +131,20 @@ export function Navbar({ onOpenPortalModal }) {
 
           {/* Mobile Dropdown Menu */}
           {mobileMenuOpen && (
-            <div className="xl:hidden mt-3 p-5 rounded-3xl bg-white shadow-soft-lg border border-sridasi-neutral-200 animate-slide-up text-left">
+            <div className="xl:hidden absolute top-full left-0 right-0 mt-3 p-5 rounded-3xl bg-white/80 backdrop-blur-xl shadow-soft-lg border border-white/50 animate-slide-up text-left">
               <div className="flex flex-col space-y-2">
                 {navLinks.map((link) => (
                   <a
                     key={link.label}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-3.5 py-2 text-xs font-semibold text-sridasi-neutral-800 hover:bg-sridasi-primary-50 hover:text-sridasi-forest rounded-xl transition-colors"
+                    className="px-3.5 py-2 text-xs font-bold text-sridasi-forest hover:bg-white/60 rounded-xl transition-colors"
                   >
                     {link.label}
                   </a>
                 ))}
                 
-                <div className="pt-3 border-t border-sridasi-neutral-200 flex flex-col gap-2">
+                <div className="pt-3 border-t border-white/40 flex flex-col gap-2">
                   <a
                     href="/training-registration"
                     target="_blank"
@@ -158,8 +159,9 @@ export function Navbar({ onOpenPortalModal }) {
               </div>
             </div>
           )}
-        </Container>
-      </header>
+        </header>
+        </div>
+      </div>
     </>
   );
 }

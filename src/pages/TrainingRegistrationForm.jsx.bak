@@ -356,7 +356,7 @@ export function TrainingRegistrationForm() {
               Your registration reference is <span className="font-mono font-bold text-sridasi-forest bg-sridasi-primary-100 px-2 py-0.5 rounded">{submissionId}</span>. 
               Our Training Director will review your land & water profile and send your 3-Day Residential Joining Kit & pre-training instructions to <strong>{formData.mobileNumber || 'your registered number'}</strong>.
             </p>
-            <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 max-w-md mx-auto text-left text-xs space-y-2">
+            <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 max-w-md mx-auto text-left text-xs space-y-2">
               <div className="font-bold text-sridasi-forest border-b border-sridasi-neutral-200 pb-1">
                 Your Assessment Snapshot:
               </div>
@@ -386,17 +386,22 @@ export function TrainingRegistrationForm() {
           <form onSubmit={handleSubmit} noValidate className="space-y-6 text-xs text-left">
             
             {/* 2-Column Responsive Layout */}
-            <div className="columns-1 md:columns-2 gap-6 print-columns w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print-grid">
+              
+              {/* ========================================================================= */}
+              {/* COLUMN 1: SECTIONS 1, 2, 3, 4                                             */}
+              {/* ========================================================================= */}
+              <div className="space-y-6">
                 
                 {/* 1. PERSONAL INFORMATION */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     1. PERSONAL INFORMATION
                   </div>
                   
                   <div className="space-y-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         1. Full Name <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -404,13 +409,13 @@ export function TrainingRegistrationForm() {
                         value={formData.fullName}
                         onChange={(e) => handleChange('fullName', e.target.value)}
                         placeholder="e.g. Anand Kumar Verma"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.fullName ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.fullName ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.fullName && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.fullName}</p>}
                     </div>
 
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         2. Educational Qualification
                       </label>
                       <input
@@ -418,18 +423,18 @@ export function TrainingRegistrationForm() {
                         value={formData.qualification}
                         onChange={(e) => handleChange('qualification', e.target.value)}
                         placeholder="e.g. Graduate / B.Sc / Diploma / High School"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.qualification ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.qualification ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.qualification && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.qualification}</p>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">3. Preferred Language:</label>
+                      <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">3. Preferred Language:</label>
                         <select
                           value={formData.preferredLanguage}
                           onChange={(e) => handleChange('preferredLanguage', e.target.value)}
-                          className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                          className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                         >
                           <option value="" disabled>Select language...</option>
                           <option>Hindi</option>
@@ -441,8 +446,8 @@ export function TrainingRegistrationForm() {
                         </select>
                       </div>
 
-                      <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                      <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                           4. Mobile / WhatsApp <span className="text-red-500">*</span>
                         </label>
                         <div className={`relative flex rounded-xl bg-white border focus-within:border-sridasi-forest focus-within:ring-1 focus-within:ring-sridasi-forest/30 transition-all ${
@@ -507,8 +512,8 @@ export function TrainingRegistrationForm() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         5. Email ID
                       </label>
                       <input
@@ -516,13 +521,13 @@ export function TrainingRegistrationForm() {
                         value={formData.emailId}
                         onChange={(e) => handleChange('emailId', e.target.value)}
                         placeholder="farmer@example.com"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.emailId ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.emailId ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.emailId && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.emailId}</p>}
                     </div>
 
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         6. Complete Address
                       </label>
                       <textarea
@@ -530,7 +535,7 @@ export function TrainingRegistrationForm() {
                         value={formData.completeAddress}
                         onChange={(e) => handleChange('completeAddress', e.target.value)}
                         placeholder="House No, Village/Ward, Post, District, State, Pin Code"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.completeAddress ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.completeAddress ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.completeAddress && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.completeAddress}</p>}
                     </div>
@@ -538,13 +543,13 @@ export function TrainingRegistrationForm() {
                 </div>
 
                 {/* 2. YOUR PRESENT SITUATION */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     2. YOUR PRESENT SITUATION
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                  <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                       7. Current Occupation
                     </label>
                     <input
@@ -552,53 +557,30 @@ export function TrainingRegistrationForm() {
                       value={formData.currentOccupation}
                       onChange={(e) => handleChange('currentOccupation', e.target.value)}
                       placeholder="e.g. Full-time Farmer / Business / Service"
-                      className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.currentOccupation ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                      className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.currentOccupation ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                     />
                     {errors.currentOccupation && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.currentOccupation}</p>}
                   </div>
 
                   <div>
                     <label className="block text-sridasi-neutral-700 font-semibold mb-1">8. What are your main challenges or constraints?</label>
-                    <div className="grid grid-cols-2 gap-y-2 gap-x-1.5 text-[11px]">
+                    <div className="grid grid-cols-2 gap-1.5 text-[11px]">
                       {['land', 'water', 'electricity', 'labour', 'finance', 'marketing', 'technicalKnowledge'].map((ch) => (
-                        <label key={ch} className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
+                        <label key={ch} className="flex items-center gap-1.5 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={formData.challenges[ch]}
                             onChange={() => handleNestedCheck('challenges', ch)}
-                            className="rounded border-sridasi-neutral-300 text-sridasi-forest focus:ring-sridasi-forest w-3.5 h-3.5"
+                            className="rounded border-sridasi-neutral-300 text-sridasi-forest focus:ring-sridasi-forest"
                           />
-                          <span className="capitalize font-medium">{ch.replace(/([A-Z])/g, ' $1')}</span>
+                          <span className="capitalize">{ch.replace(/([A-Z])/g, ' $1')}</span>
                         </label>
                       ))}
-                      <div className="col-span-2 flex items-center gap-2 mt-1">
-                        <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest shrink-0">
-                          <input
-                            type="checkbox"
-                            checked={!!formData.challenges.other}
-                            onChange={(e) => {
-                              if (!e.target.checked) {
-                                setFormData(prev => ({ ...prev, challenges: { ...prev.challenges, other: '' } }));
-                              } else if (!formData.challenges.other) {
-                                setFormData(prev => ({ ...prev, challenges: { ...prev.challenges, other: ' ' } }));
-                              }
-                            }}
-                            className="rounded border-sridasi-neutral-300 text-sridasi-forest focus:ring-sridasi-forest w-3.5 h-3.5"
-                          />
-                          <span className="font-medium">Other:</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.challenges.other.trim()}
-                          onChange={(e) => setFormData(prev => ({ ...prev, challenges: { ...prev.challenges, other: e.target.value } }))}
-                          className="flex-1 min-w-0 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 text-sridasi-forest"
-                        />
-                      </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                  <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                       9. Why are you interested in farming?
                     </label>
                     <textarea
@@ -606,21 +588,21 @@ export function TrainingRegistrationForm() {
                       value={formData.interestReason}
                       onChange={(e) => handleChange('interestReason', e.target.value)}
                       placeholder="e.g. Desiring a sustainable multi-income farm business..."
-                      className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.interestReason ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                      className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.interestReason ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                     />
                     {errors.interestReason && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.interestReason}</p>}
                   </div>
                 </div>
 
                 {/* 3. YOUR LAND & WATER */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     3. YOUR LAND & WATER
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         10. Total Land Available
                       </label>
                       <div className="flex gap-1">
@@ -629,14 +611,14 @@ export function TrainingRegistrationForm() {
                           value={formData.totalLand}
                           onChange={(e) => handleChange('totalLand', e.target.value)}
                           placeholder="e.g. 3.5"
-                          className={`flex-1 min-w-0 p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${
+                          className={`w-2/3 p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${
                             errors.totalLand ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'
                           }`}
                         />
                         <select
                           value={formData.landUnit}
                           onChange={(e) => handleChange('landUnit', e.target.value)}
-                          className="w-24 shrink-0 p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                          className="w-1/3 border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                         >
                           <option value="" disabled>Unit</option>
                           <option>Acres</option>
@@ -648,8 +630,8 @@ export function TrainingRegistrationForm() {
                       {errors.totalLand && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.totalLand}</p>}
                     </div>
 
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         11. Land for Farming
                       </label>
                       <input
@@ -657,7 +639,7 @@ export function TrainingRegistrationForm() {
                         value={formData.landUsedForFarming}
                         onChange={(e) => handleChange('landUsedForFarming', e.target.value)}
                         placeholder="e.g. 2.0 Acres"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.landUsedForFarming ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.landUsedForFarming ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.landUsedForFarming && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.landUsedForFarming}</p>}
                     </div>
@@ -699,192 +681,159 @@ export function TrainingRegistrationForm() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">14. Borewell Elec.:</label>
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">14. Borewell Elec.:</label>
                       <select
                         value={formData.borewellElectricity}
                         onChange={(e) => handleChange('borewellElectricity', e.target.value)}
-                        className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                       >
                         <option value="" disabled>Select...</option>
                         <option>Yes</option>
                         <option>No</option>
                       </select>
                     </div>
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">Pipe Size:</label>
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">15. Pipe Size:</label>
                       <input
                         type="text"
                         value={formData.borewellSize}
                         onChange={(e) => handleChange('borewellSize', e.target.value)}
                         placeholder='e.g. 4" / 6"'
-                        className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                       />
                     </div>
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">15. Elec. Hrs/Day:</label>
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">16. Elec. Hrs/Day:</label>
                       <input
                         type="text"
                         value={formData.electricityHours}
                         onChange={(e) => handleChange('electricityHours', e.target.value)}
                         placeholder="e.g. 10 hrs"
-                        className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* 4. FARM LOCATION & SECURITY */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-4 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     4. FARM LOCATION & SECURITY
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
-                        16. Village / Town
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
+                        17. Village
                       </label>
                       <input
                         type="text"
                         value={formData.villageTown}
                         onChange={(e) => handleChange('villageTown', e.target.value)}
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.villageTown ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        placeholder="Village"
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.villageTown ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.villageTown && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.villageTown}</p>}
                     </div>
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
-                        District
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
+                        18. District
                       </label>
                       <input
                         type="text"
                         value={formData.district}
                         onChange={(e) => handleChange('district', e.target.value)}
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.district ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        placeholder="District"
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.district ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.district && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.district}</p>}
                     </div>
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
-                        State
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
+                        19. State
                       </label>
                       <input
                         type="text"
                         value={formData.state}
                         onChange={(e) => handleChange('state', e.target.value)}
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.state ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        placeholder="State"
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.state ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.state && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.state}</p>}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
-                        17. Distance from Main Road
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
+                        20. Dist. from Main Road
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={formData.distanceMainRoad}
-                          onChange={(e) => handleChange('distanceMainRoad', e.target.value)}
-                          className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none pr-8 ${errors.distanceMainRoad ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sridasi-neutral-500 font-medium">km</span>
-                      </div>
+                      <input
+                        type="text"
+                        value={formData.distanceMainRoad}
+                        onChange={(e) => handleChange('distanceMainRoad', e.target.value)}
+                        placeholder="e.g. 500 meters"
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.distanceMainRoad ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
+                      />
                       {errors.distanceMainRoad && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.distanceMainRoad}</p>}
                     </div>
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
-                        18. Distance from Nearest Market
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
+                        21. Dist. to Market
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={formData.distanceMarket}
-                          onChange={(e) => handleChange('distanceMarket', e.target.value)}
-                          className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none pr-8 ${errors.distanceMarket ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sridasi-neutral-500 font-medium">km</span>
-                      </div>
+                      <input
+                        type="text"
+                        value={formData.distanceMarket}
+                        onChange={(e) => handleChange('distanceMarket', e.target.value)}
+                        placeholder="e.g. 8 km"
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.distanceMarket ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
+                      />
                       {errors.distanceMarket && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.distanceMarket}</p>}
                     </div>
                   </div>
 
-                  <div className="space-y-4 pt-2">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-sridasi-neutral-200">
-                        <label className="text-sridasi-neutral-700 font-semibold">19. Predators / Wild Animals Around the Farm?</label>
-                        <div className="flex items-center gap-4 shrink-0 pl-4">
-                          <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
-                            <input type="radio" name="predators" value="Yes" checked={formData.predatorsWildAnimals === 'Yes'} onChange={(e) => handleChange('predatorsWildAnimals', e.target.value)} className="w-3.5 h-3.5 accent-sridasi-forest" />
-                            <span className="font-medium">Yes</span>
-                          </label>
-                          <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
-                            <input type="radio" name="predators" value="No" checked={formData.predatorsWildAnimals === 'No'} onChange={(e) => handleChange('predatorsWildAnimals', e.target.value)} className="w-3.5 h-3.5 accent-sridasi-forest" />
-                            <span className="font-medium">No</span>
-                          </label>
-                        </div>
-                      </div>
-                      {formData.predatorsWildAnimals === 'Yes' && (
-                        <div className="flex items-center gap-3 pl-2">
-                          <span className="text-sridasi-neutral-500 shrink-0 font-medium">If yes, specify:</span>
-                          <input type="text" value={formData.predatorsSpecify} onChange={(e) => handleChange('predatorsSpecify', e.target.value)} className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest shadow-sm" />
-                        </div>
-                      )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">22. Wild Animal Threat:</label>
+                      <select
+                        value={formData.predatorsWildAnimals}
+                        onChange={(e) => handleChange('predatorsWildAnimals', e.target.value)}
+                        className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                      >
+                        <option value="" disabled>Select...</option>
+                        <option>No</option>
+                        <option>Yes (Wild Boar / Stray Cattle)</option>
+                        <option>Yes (Birds / Fish Predators)</option>
+                      </select>
                     </div>
-
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-sridasi-neutral-200">
-                        <label className="text-sridasi-neutral-700 font-semibold">20. Theft / Trespassing / Security Concerns?</label>
-                        <div className="flex items-center gap-4 shrink-0 pl-4">
-                          <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
-                            <input type="radio" name="theft" value="Yes" checked={formData.theftTrespassing === 'Yes'} onChange={(e) => handleChange('theftTrespassing', e.target.value)} className="w-3.5 h-3.5 accent-sridasi-forest" />
-                            <span className="font-medium">Yes</span>
-                          </label>
-                          <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
-                            <input type="radio" name="theft" value="No" checked={formData.theftTrespassing === 'No'} onChange={(e) => handleChange('theftTrespassing', e.target.value)} className="w-3.5 h-3.5 accent-sridasi-forest" />
-                            <span className="font-medium">No</span>
-                          </label>
-                        </div>
-                      </div>
-                      {formData.theftTrespassing === 'Yes' && (
-                        <div className="flex items-center gap-3 pl-2">
-                          <span className="text-sridasi-neutral-500 shrink-0 font-medium">If yes, explain:</span>
-                          <input type="text" value={formData.theftExplain} onChange={(e) => handleChange('theftExplain', e.target.value)} className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest shadow-sm" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col gap-2 bg-white p-3 rounded-xl border border-sridasi-neutral-200">
-                      <label className="text-sridasi-neutral-700 font-semibold">21. Farm Protection: Are you prepared to provide fencing / boundary protection?</label>
-                      <div className="flex items-center gap-6 mt-1">
-                        <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
-                          <input type="radio" name="farmProtection" value="Yes" checked={formData.farmProtection === 'Yes'} onChange={(e) => handleChange('farmProtection', e.target.value)} className="w-3.5 h-3.5 accent-sridasi-forest" />
-                          <span className="font-medium">Yes</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
-                          <input type="radio" name="farmProtection" value="No" checked={formData.farmProtection === 'No'} onChange={(e) => handleChange('farmProtection', e.target.value)} className="w-3.5 h-3.5 accent-sridasi-forest" />
-                          <span className="font-medium">No</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
-                          <input type="radio" name="farmProtection" value="Need Guidance" checked={formData.farmProtection === 'Need Guidance'} onChange={(e) => handleChange('farmProtection', e.target.value)} className="w-3.5 h-3.5 accent-sridasi-forest" />
-                          <span className="font-medium">Need Guidance</span>
-                        </label>
-                      </div>
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">22b. Boundary Fencing:</label>
+                      <select
+                        value={formData.farmProtection}
+                        onChange={(e) => handleChange('farmProtection', e.target.value)}
+                        className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                      >
+                        <option value="" disabled>Select...</option>
+                        <option>Yes (Complete Wire Mesh / Wall)</option>
+                        <option>Partial Fencing</option>
+                        <option>No Fencing</option>
+                      </select>
                     </div>
                   </div>
                 </div>
+
+              </div>
+
+              {/* ========================================================================= */}
+              {/* COLUMN 2: SECTIONS 5, 6, 7, 8, 9                                          */}
+              {/* ========================================================================= */}
+              <div className="space-y-6">
                 
                 {/* 5. BASIC FARM INFRASTRUCTURE */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     5. BASIC FARM INFRASTRUCTURE
-                  </div>
-
-                  <div className="text-sridasi-neutral-700 font-semibold mb-1">
-                    22. Can the following facilities be provided?
                   </div>
 
                   <div className="space-y-2 text-[11px]">
@@ -933,20 +882,20 @@ export function TrainingRegistrationForm() {
                     ))}
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">23. Other Existing Infrastructure:</label>
+                  <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">23. Other Existing Infrastructure:</label>
                     <input
                       type="text"
                       value={formData.otherExistingInfra}
                       onChange={(e) => handleChange('otherExistingInfra', e.target.value)}
                       placeholder="e.g. Shed, Nursery Net, Feed Store..."
-                      className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                      className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                     />
                   </div>
                 </div>
 
                 {/* 6. TRANSPORT & CONNECTIVITY */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     6. TRANSPORT & CONNECTIVITY
                   </div>
@@ -976,8 +925,8 @@ export function TrainingRegistrationForm() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         25. Dist. All-Weather Road
                       </label>
                       <input
@@ -985,12 +934,12 @@ export function TrainingRegistrationForm() {
                         value={formData.distanceAllWeatherRoad}
                         onChange={(e) => handleChange('distanceAllWeatherRoad', e.target.value)}
                         placeholder="e.g. 200 meters"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.distanceAllWeatherRoad ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.distanceAllWeatherRoad ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.distanceAllWeatherRoad && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.distanceAllWeatherRoad}</p>}
                     </div>
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         26. Dist. Nearest Market
                       </label>
                       <input
@@ -998,7 +947,7 @@ export function TrainingRegistrationForm() {
                         value={formData.distanceNearestMarket}
                         onChange={(e) => handleChange('distanceNearestMarket', e.target.value)}
                         placeholder="e.g. 5 km"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.distanceNearestMarket ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.distanceNearestMarket ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.distanceNearestMarket && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.distanceNearestMarket}</p>}
                     </div>
@@ -1006,14 +955,14 @@ export function TrainingRegistrationForm() {
                 </div>
 
                 {/* 7. FINANCIAL CAPACITY */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     7. FINANCIAL CAPACITY
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                         27. Annual Family Income
                       </label>
                       <input
@@ -1021,24 +970,24 @@ export function TrainingRegistrationForm() {
                         value={formData.approxAnnualIncome}
                         onChange={(e) => handleChange('approxAnnualIncome', e.target.value)}
                         placeholder="e.g. ₹6 Lakhs"
-                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.approxAnnualIncome ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.approxAnnualIncome ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                       />
                       {errors.approxAnnualIncome && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.approxAnnualIncome}</p>}
                     </div>
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">28. Farming Income:</label>
+                    <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">28. Farming Income:</label>
                       <input
                         type="text"
                         value={formData.farmingAnnualIncome}
                         onChange={(e) => handleChange('farmingAnnualIncome', e.target.value)}
                         placeholder="e.g. ₹2.5 Lakhs"
-                        className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        className="flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                       />
                     </div>
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                  <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                       29. Investment Capital Available for Project
                     </label>
                     <input
@@ -1046,7 +995,7 @@ export function TrainingRegistrationForm() {
                       value={formData.approxInvestmentAvailable}
                       onChange={(e) => handleChange('approxInvestmentAvailable', e.target.value)}
                       placeholder="e.g. ₹2 Lakhs to ₹5 Lakhs"
-                      className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.approxInvestmentAvailable ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                      className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.approxInvestmentAvailable ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                     />
                     {errors.approxInvestmentAvailable && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.approxInvestmentAvailable}</p>}
                   </div>
@@ -1071,7 +1020,7 @@ export function TrainingRegistrationForm() {
                 </div>
 
                 {/* 8. YOUR FARMING INTEREST */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     8. YOUR FARMING INTEREST
                   </div>
@@ -1103,8 +1052,8 @@ export function TrainingRegistrationForm() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                  <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                       32. Which activity would you like to develop first?
                     </label>
                     <input
@@ -1112,20 +1061,20 @@ export function TrainingRegistrationForm() {
                       value={formData.activityToDevelopFirst}
                       onChange={(e) => handleChange('activityToDevelopFirst', e.target.value)}
                       placeholder="e.g. Fishery + Poultry + Organic Vegetables"
-                      className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.activityToDevelopFirst ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                      className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.activityToDevelopFirst ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                     />
                     {errors.activityToDevelopFirst && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.activityToDevelopFirst}</p>}
                   </div>
                 </div>
 
                 {/* 9. TIME & LABOUR */}
-                <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                   <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                     9. TIME & LABOUR
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">
+                  <div className="flex items-center w-full">
+                      <label className="text-sridasi-neutral-700 font-semibold whitespace-nowrap min-w-max mr-2">
                       34. How much time can you give each day?
                     </label>
                     <input
@@ -1133,7 +1082,7 @@ export function TrainingRegistrationForm() {
                       value={formData.dailyTimeHours}
                       onChange={(e) => handleChange('dailyTimeHours', e.target.value)}
                       placeholder="e.g. 6 to 8 hours/day"
-                      className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.dailyTimeHours ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                      className={`flex-1 w-full border-b-2 border-sridasi-neutral-400 bg-transparent px-2 py-0.5 text-sridasi-forest focus:outline-none ${errors.dailyTimeHours ? 'border-red-500 bg-red-50' : 'focus:border-sridasi-forest'}`}
                     />
                     {errors.dailyTimeHours && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.dailyTimeHours}</p>}
                   </div>
@@ -1175,66 +1124,83 @@ export function TrainingRegistrationForm() {
                   </div>
                 </div>
 
+              </div>
+
+            </div>
+
             {/* 10. YOUR FARM AT A GLANCE */}
-            <div className="break-inside-avoid mb-6 p-6 rounded-3xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] border border-sridasi-forest/20 shadow-soft-sm print-section relative overflow-hidden">
+            <div className="mt-6 p-6 rounded-3xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] border border-sridasi-forest/20 shadow-soft-sm print-section relative overflow-hidden">
               <div className="absolute top-0 left-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -ml-10 -mt-10 pointer-events-none"></div>
               
-              <div className="z-10 relative">
-                <h3 className="font-heading font-extrabold text-lg text-sridasi-forest uppercase tracking-tight mb-4">
-                  10. YOUR FARM AT A GLANCE
-                </h3>
-                
-                <div className="grid grid-cols-[auto_1fr_auto_1fr] gap-x-3 gap-y-4 text-xs font-semibold text-sridasi-neutral-800 items-end">
-                    <span className="shrink-0 pb-1">Land:</span>
-                    <input 
-                      type="text" 
-                      value={formData.farmAtAGlance.land}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, land: e.target.value }}))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0" 
-                    />
-
-                    <span className="shrink-0 pb-1 pl-2">Water:</span>
-                    <input 
-                      type="text" 
-                      value={formData.farmAtAGlance.water}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, water: e.target.value }}))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0" 
-                    />
-
-                    <span className="shrink-0 pb-1">Electricity:</span>
-                    <input 
-                      type="text" 
-                      value={formData.farmAtAGlance.electricity}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, electricity: e.target.value }}))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0" 
-                    />
-
-                    <span className="shrink-0 pb-1 pl-2">Road:</span>
-                    <input 
-                      type="text" 
-                      value={formData.farmAtAGlance.road}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, road: e.target.value }}))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0" 
-                    />
-
-                    <span className="shrink-0 pb-1">Market Distance:</span>
-                    <input 
-                      type="text" 
-                      value={formData.farmAtAGlance.marketDistance}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, marketDistance: e.target.value }}))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0" 
-                    />
-
-                    <span className="shrink-0 pb-1 pl-2">Security:</span>
-                    <input 
-                      type="text" 
-                      value={formData.farmAtAGlance.security}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, security: e.target.value }}))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0" 
-                    /></div>
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 rounded-full bg-white shadow-soft flex items-center justify-center shrink-0 border-2 border-sridasi-forest/10 z-10">
+                  <Sprout className="w-8 h-8 text-sridasi-forest" />
                 </div>
+                
+                <div className="flex-1 z-10">
+                  <h3 className="font-heading font-extrabold text-lg text-sridasi-forest uppercase tracking-tight mb-4">
+                    YOUR FARM AT A GLANCE
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-xs font-semibold text-sridasi-neutral-800">
+                    <div className="flex items-center gap-2">
+                      <span className="w-24">Land:</span>
+                      <input 
+                        type="text" 
+                        value={formData.farmAtAGlance.land}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, land: e.target.value }}))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-24">Water:</span>
+                      <input 
+                        type="text" 
+                        value={formData.farmAtAGlance.water}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, water: e.target.value }}))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-24">Electricity:</span>
+                      <input 
+                        type="text" 
+                        value={formData.farmAtAGlance.electricity}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, electricity: e.target.value }}))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-24">Road:</span>
+                      <input 
+                        type="text" 
+                        value={formData.farmAtAGlance.road}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, road: e.target.value }}))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-24">Market Distance:</span>
+                      <input 
+                        type="text" 
+                        value={formData.farmAtAGlance.marketDistance}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, marketDistance: e.target.value }}))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-24">Security:</span>
+                      <input 
+                        type="text" 
+                        value={formData.farmAtAGlance.security}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, security: e.target.value }}))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
             {/* Submission Bar (Hidden during Print) */}
             <div className="pt-6 border-t-2 border-sridasi-forest flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
