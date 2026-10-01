@@ -1796,11 +1796,11 @@ export function AdminDashboard() {
                 </Button>
                 <button
                   onClick={(e) => handleRequestDelete(selectedUser, e)}
-                  className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                  className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition-all flex flex-row flex-nowrap items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
                   title="Delete this registration record permanently"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Delete Record</span>
+                  <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">Delete Record</span>
                 </button>
               </div>
               
@@ -1881,10 +1881,10 @@ export function AdminDashboard() {
                 size="sm"
                 disabled={isDeleting}
                 onClick={executeDeleteUser}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold border-red-600 shadow-soft hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="bg-red-600 hover:bg-red-700 text-white font-bold border-red-600 shadow-soft hover:shadow-lg transition-all whitespace-nowrap cursor-pointer"
+                leftIcon={<Trash2 className="w-4 h-4 shrink-0" />}
               >
-                <Trash2 className="w-4 h-4" />
-                <span>{isDeleting ? 'Deleting...' : 'Permanently Delete'}</span>
+                {isDeleting ? 'Deleting...' : 'Permanently Delete'}
               </Button>
             </div>
 
