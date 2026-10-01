@@ -235,13 +235,15 @@ export function TrainingRegistrationForm() {
         @media print {
           @page {
             size: A4 portrait;
-            margin: 8mm 10mm 8mm 10mm;
+            margin: 5mm;
           }
           body {
             background: white !important;
-            color: #0f172a !important;
+            color: #000 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-size: 9px !important;
+            line-height: 1.2 !important;
           }
           .print-hidden, .print\\:hidden {
             display: none !important;
@@ -253,24 +255,37 @@ export function TrainingRegistrationForm() {
             margin: 0 !important;
             max-width: 100% !important;
           }
+          .print-columns {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            columns: auto !important;
+            align-items: start !important;
+          }
           .print-section {
             break-inside: avoid !important;
             page-break-inside: avoid !important;
-            margin-bottom: 12px !important;
-            border: 1px solid #e2e8f0 !important;
-            padding: 10px !important;
+            margin-bottom: 0 !important;
+            border: 1px solid #cbd5e1 !important;
+            padding: 6px 8px !important;
+            border-radius: 4px !important;
           }
           input, select, textarea {
             border: 1px solid #cbd5e1 !important;
-            background-color: #f8fafc !important;
-            font-size: 10px !important;
-            padding: 4px 6px !important;
+            background-color: transparent !important;
+            font-size: 9px !important;
+            padding: 2px 4px !important;
+            height: auto !important;
+            min-height: 0 !important;
           }
-          .print-grid {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 12px !important;
-          }
+          .gap-6 { gap: 8px !important; }
+          .gap-4 { gap: 6px !important; }
+          .gap-2 { gap: 4px !important; }
+          .mb-6 { margin-bottom: 8px !important; }
+          .mb-4 { margin-bottom: 6px !important; }
+          .mb-2 { margin-bottom: 4px !important; }
+          .p-6, .p-4, .p-3 { padding: 6px !important; }
+          h3, .font-heading { font-size: 10px !important; margin-bottom: 4px !important; }
         }
       `}</style>
 
