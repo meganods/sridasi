@@ -117,13 +117,7 @@ export function Footer({ onOpenConsultModal, onOpenPortalModal }) {
             <a href="#about" className="hover:text-white transition-colors">Founder Blueprint</a>
             <a href="#calculator" className="hover:text-white transition-colors">Aqua ROI Calculator</a>
             <a href="#faq" className="hover:text-white transition-colors">Knowledge Base</a>
-            <a 
-              href="/admin" 
-              className="inline-flex items-center gap-1.5 text-sridasi-yellow hover:text-yellow-300 font-medium bg-sridasi-primary-800/80 px-2.5 py-1 rounded-lg border border-sridasi-primary-600/60 transition-colors"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Admin Login
-            </a>
+
           </div>
         </div>
       </Container>
