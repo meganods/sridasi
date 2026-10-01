@@ -211,16 +211,7 @@ export function TrainingRegistrationForm() {
       errs.mobileNumber = 'Enter a valid mobile number';
     }
 
-    // Buyer Specific Validation
-    if (formData.role === 'buyer') {
-      if (!formData.companyName.trim()) {
-        errs.companyName = 'Company / Business name is required';
-      }
-      if (!formData.businessType) {
-        errs.businessType = 'Please select your business type';
-      }
-    }
-
+    // Removed buyer specific validation since UI fields don't exist yet
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
