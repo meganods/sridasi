@@ -28,10 +28,12 @@ import {
   Compass,
   Layers,
   CheckSquare,
-  Trash2
+  Trash2,
+  Edit2,
+  Save
 } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import BRAND_INFO from '../data/brandInfo';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -420,6 +422,31 @@ const SEED_USERS = [
   }
 ];
 
+const CustomDatePicker = ({ value, onChange, className, disabled }) => {
+  const displayValue = value ? value.split('-').reverse().join('/') : '';
+  
+  return (
+    <div className="relative w-full">
+      <input
+        type="text"
+        placeholder="dd/mm/yyyy"
+        value={displayValue}
+        disabled={disabled}
+        readOnly
+        className={`${className} ${disabled ? '' : 'cursor-pointer'} w-full`}
+      />
+      {!disabled && (
+        <input
+          type="date"
+          value={value || ''}
+          onChange={onChange}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+        />
+      )}
+    </div>
+  );
+};
+
 export function AdminDashboard() {
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -440,6 +467,57 @@ export function AdminDashboard() {
   const [userToDeleteModal, setUserToDeleteModal] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
+
+  const [isEditingFarmUse, setIsEditingFarmUse] = useState(false);
+  const [farmUseData, setFarmUseData] = useState({
+    buyerId: '',
+    registrationDate: '',
+    assignedBy: '',
+    leadType: '',
+    followUpDate: '',
+    status: ''
+  });
+  const [isSavingFarmUse, setIsSavingFarmUse] = useState(false);
+
+  const handleOpenDossier = (user) => {
+    setSelectedUser(user);
+    setFarmUseData(user.farmUseDetails || {
+      buyerId: '', registrationDate: '', assignedBy: '', leadType: '', followUpDate: '', status: ''
+    });
+    setIsEditingFarmUse(false);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSaveFarmUse = async () => {
+    setIsSavingFarmUse(true);
+    try {
+      if (selectedUser.docId && selectedUser.collection) {
+        const userRef = doc(db, selectedUser.collection, selectedUser.docId);
+        await updateDoc(userRef, { farmUseDetails: farmUseData });
+      } else {
+        // Also update local storage if it's a local record
+        const localStr = localStorage.getItem('sridasi_registrations');
+        if (localStr) {
+          const list = JSON.parse(localStr);
+          const updated = list.map(item => {
+            const itemId = item.submissionId || item.id;
+            if (itemId === selectedUser.id) {
+              return { ...item, farmUseDetails: farmUseData };
+            }
+            return item;
+          });
+          localStorage.setItem('sridasi_registrations', JSON.stringify(updated));
+        }
+      }
+      setSelectedUser(prev => ({ ...prev, farmUseDetails: farmUseData }));
+      setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, farmUseDetails: farmUseData } : u));
+      setIsEditingFarmUse(false);
+    } catch (error) {
+      console.error('Error updating farm use details:', error);
+      alert('Failed to save farm use details. Please try again.');
+    }
+    setIsSavingFarmUse(false);
+  };
 
   // Handle Login Authentication
   const handleLogin = (e) => {
@@ -552,6 +630,14 @@ export function AdminDashboard() {
       staffAvailability: d.staffAvailability || '',
       hasFarmManager: d.hasFarmManager || '',
       farmAtAGlance: d.farmAtAGlance || {},
+      farmUseDetails: d.farmUseDetails || {
+        buyerId: '',
+        registrationDate: '',
+        assignedBy: '',
+        leadType: '',
+        followUpDate: '',
+        status: ''
+      },
       submittedAtStr: d.submittedAtStr || (dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
       timestamp: dateObj,
       rawFormData: d
@@ -1227,10 +1313,7 @@ export function AdminDashboard() {
                         <td className="py-4 px-4 text-right align-middle">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
-                              onClick={() => {
-                                setSelectedUser(farmer);
-                                setIsDrawerOpen(true);
-                              }}
+                              onClick={() => handleOpenDossier(farmer)}
                               className="px-3 py-1.5 rounded-xl bg-sridasi-forest hover:bg-sridasi-dark text-white font-bold text-xs shadow-soft-sm transition-all inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
                               title="View full assessment dossier"
                             >
@@ -1359,10 +1442,7 @@ export function AdminDashboard() {
                         <td className="py-4 px-4 text-right align-middle">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
-                              onClick={() => {
-                                setSelectedUser(buyer);
-                                setIsDrawerOpen(true);
-                              }}
+                              onClick={() => handleOpenDossier(buyer)}
                               className="px-3 py-1.5 rounded-xl bg-sridasi-forest hover:bg-sridasi-dark text-white font-bold text-xs shadow-soft-sm transition-all inline-flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
                               title="View full registration dossier"
                             >
@@ -1781,6 +1861,111 @@ export function AdminDashboard() {
                   {renderField('Security', selectedUser.farmAtAGlance?.security)}
                 </div>
               </div>
+
+              {/* SECTION 11: FOR FARM USE (BUYER SPECIFIC) */}
+              {selectedUser.role === 'buyer' && (
+                <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-3 print-break-inside-avoid relative">
+                  <div className="font-heading font-bold text-sm text-amber-800 border-b border-amber-200 pb-1.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-amber-800" />
+                      <span>11. FOR FARM USE (ADMIN ONLY)</span>
+                    </div>
+                    {!isEditingFarmUse ? (
+                      <button 
+                        onClick={() => setIsEditingFarmUse(true)}
+                        className="text-amber-700 hover:text-amber-900 flex items-center gap-1 text-[10px] uppercase font-bold bg-amber-100/50 hover:bg-amber-100 px-2 py-1 rounded transition-colors no-print"
+                      >
+                        <Edit2 className="w-3 h-3" /> Edit Details
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={handleSaveFarmUse}
+                        disabled={isSavingFarmUse}
+                        className="text-white flex items-center gap-1 text-[10px] uppercase font-bold bg-amber-600 hover:bg-amber-700 px-2 py-1 rounded transition-colors no-print disabled:opacity-50"
+                      >
+                        <Save className="w-3 h-3" /> {isSavingFarmUse ? 'Saving...' : 'Save Details'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {isEditingFarmUse ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-sridasi-neutral-600">Buyer ID</label>
+                        <input 
+                          type="text" 
+                          value={farmUseData.buyerId} 
+                          onChange={(e) => setFarmUseData({...farmUseData, buyerId: e.target.value})}
+                          className="border border-sridasi-neutral-300 rounded px-2 py-1 text-xs" 
+                          placeholder="e.g. BUY-101"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-sridasi-neutral-600">Registration Date</label>
+                        <CustomDatePicker 
+                          value={farmUseData.registrationDate} 
+                          onChange={(e) => setFarmUseData({...farmUseData, registrationDate: e.target.value})}
+                          className="border border-sridasi-neutral-300 rounded px-2 py-1 text-xs" 
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-sridasi-neutral-600">Assigned By</label>
+                        <input 
+                          type="text" 
+                          value={farmUseData.assignedBy} 
+                          onChange={(e) => setFarmUseData({...farmUseData, assignedBy: e.target.value})}
+                          className="border border-sridasi-neutral-300 rounded px-2 py-1 text-xs" 
+                          placeholder="e.g. Admin Name"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-sridasi-neutral-600">Lead Type</label>
+                        <select 
+                          value={farmUseData.leadType} 
+                          onChange={(e) => setFarmUseData({...farmUseData, leadType: e.target.value})}
+                          className="border border-sridasi-neutral-300 rounded px-2 py-1 text-xs"
+                        >
+                          <option value="">Select...</option>
+                          <option value="Retail">Retail</option>
+                          <option value="B2B">B2B</option>
+                          <option value="Wholesale">Wholesale</option>
+                        </select>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-sridasi-neutral-600">Follow-up Date</label>
+                        <CustomDatePicker 
+                          value={farmUseData.followUpDate} 
+                          onChange={(e) => setFarmUseData({...farmUseData, followUpDate: e.target.value})}
+                          className="border border-sridasi-neutral-300 rounded px-2 py-1 text-xs" 
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-sridasi-neutral-600">Status</label>
+                        <select 
+                          value={farmUseData.status} 
+                          onChange={(e) => setFarmUseData({...farmUseData, status: e.target.value})}
+                          className="border border-sridasi-neutral-300 rounded px-2 py-1 text-xs"
+                        >
+                          <option value="">Select...</option>
+                          <option value="New">New</option>
+                          <option value="Follow-up">Follow-up</option>
+                          <option value="Converted">Converted</option>
+                          <option value="Closed">Closed</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {renderField('Buyer ID', selectedUser.farmUseDetails?.buyerId)}
+                      {renderField('Registration Date', selectedUser.farmUseDetails?.registrationDate)}
+                      {renderField('Assigned By', selectedUser.farmUseDetails?.assignedBy)}
+                      {renderField('Lead Type', selectedUser.farmUseDetails?.leadType)}
+                      {renderField('Follow-up Date', selectedUser.farmUseDetails?.followUpDate)}
+                      {renderField('Status', selectedUser.farmUseDetails?.status)}
+                    </div>
+                  )}
+                </div>
+              )}
 
             </div>
 

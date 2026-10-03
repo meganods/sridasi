@@ -85,7 +85,7 @@ export function Footer({ onOpenConsultModal, onOpenPortalModal }) {
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-sridasi-leaf-400 shrink-0" />
-                <span>support@sridasifarms.com</span>
+                <a href="mailto:support@sridasi.in" className="hover:text-white transition-colors">support@sridasi.in</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-sridasi-leaf-400 shrink-0" />

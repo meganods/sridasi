@@ -107,17 +107,6 @@ export function FarmerAppStudio() {
               <span>2. Problem & Diagnostic</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('admin')}
-              className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-heading text-xs sm:text-sm font-bold transition-all duration-200 ${
-                activeTab === 'admin'
-                  ? 'bg-sridasi-forest text-white shadow-soft'
-                  : 'text-sridasi-neutral-600 hover:text-sridasi-forest hover:bg-white'
-              }`}
-            >
-              <Shield className="w-4 h-4 text-sridasi-yellow" />
-              <span>3. Admin Control Center</span>
-            </button>
           </div>
         </div>
 
@@ -224,19 +213,6 @@ export function FarmerAppStudio() {
               ))}
             </div>
 
-            {/* Admin Note Footer */}
-            <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 text-xs text-sridasi-neutral-600 flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-sridasi-forest" />
-                <span>Pond telemetry onboarding and sensor calibration are managed through the Central Admin Portal.</span>
-              </span>
-              <button 
-                onClick={() => setActiveTab('admin')} 
-                className="font-bold text-sridasi-forest hover:text-sridasi-green hover:underline shrink-0"
-              >
-                View Admin Controls →
-              </button>
-            </div>
 
           </div>
         )}
@@ -460,130 +436,7 @@ export function FarmerAppStudio() {
 
           </div>
         )}
-        {/* ========================================================================= */}
-        {/* TAB 3: ADMIN OVERSIGHT CONTROL CENTER                                      */}
-        {/* ========================================================================= */}
-        {activeTab === 'admin' && (
-          <div className="space-y-6 animate-fade-in text-left">
-            
-            {/* Top Admin Navigation */}
-            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-sridasi-forest text-white shadow-soft">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-sridasi-yellow text-sridasi-forest flex items-center justify-center font-bold">
-                  <Shield className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-bold text-base text-white">Sridasi Central Administration Hub</h3>
-                  <p className="text-xs text-sridasi-leaf-200">Real-time farm telemetry, diagnostic triage logs, bio-product distribution & farmer management</p>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setAdminSection('farmers')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    adminSection === 'farmers' ? 'bg-white text-sridasi-forest shadow-soft-sm' : 'bg-sridasi-primary-800 text-white'
-                  }`}
-                >
-                  Manage Farmers (4,850)
-                </button>
-                <button
-                  onClick={() => setAdminSection('diagnostics')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    adminSection === 'diagnostics' ? 'bg-white text-sridasi-forest shadow-soft-sm' : 'bg-sridasi-primary-800 text-white'
-                  }`}
-                >
-                  Diagnostic Triage
-                </button>
-                <button
-                  onClick={() => setAdminSection('orders')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    adminSection === 'orders' ? 'bg-white text-sridasi-forest shadow-soft-sm' : 'bg-sridasi-primary-800 text-white'
-                  }`}
-                >
-                  Bio-Formulation Supply
-                </button>
-                <button
-                  onClick={() => setAdminSection('analytics')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    adminSection === 'analytics' ? 'bg-white text-sridasi-forest shadow-soft-sm' : 'bg-sridasi-primary-800 text-white'
-                  }`}
-                >
-                  Yield Analytics
-                </button>
-              </div>
-            </div>
-
-            {/* Admin Grid View */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200">
-                <span className="text-[11px] font-bold text-sridasi-neutral-500 uppercase">Active Monitored Acreage</span>
-                <div className="text-2xl font-bold font-heading text-sridasi-forest mt-1">14,280 Acres</div>
-                <span className="text-[11px] text-emerald-700 font-semibold">● 100% Sensor Telemetry Active</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200">
-                <span className="text-[11px] font-bold text-sridasi-neutral-500 uppercase">Bio-Input Supply & Dispatch</span>
-                <div className="text-2xl font-bold font-heading text-sridasi-forest mt-1">₹28,45,000</div>
-                <span className="text-[11px] text-sridasi-neutral-600">Tribiotic & Aquamazic formula deliveries</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200">
-                <span className="text-[11px] font-bold text-sridasi-neutral-500 uppercase">Farmer Yield Efficiency</span>
-                <div className="text-2xl font-bold font-heading text-sridasi-forest mt-1">99.4%</div>
-                <span className="text-[11px] text-emerald-700 font-semibold">Average Farm Profit Gain +300%</span>
-              </div>
-            </div>
-
-            {/* Live Data Table Mockup */}
-            <div className="rounded-3xl bg-white border border-sridasi-neutral-200 overflow-hidden shadow-soft-sm">
-              <div className="p-4 border-b border-sridasi-neutral-200 flex items-center justify-between">
-                <h4 className="font-heading font-bold text-sm text-sridasi-forest">Recent Farmer Diagnostic Cases & Bio-Remedy Log</h4>
-                <Badge variant="green" size="sm">Live Feed</Badge>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-sridasi-surface text-sridasi-neutral-700 border-b border-sridasi-neutral-200">
-                    <tr>
-                      <th className="p-3 font-bold">Farmer Name</th>
-                      <th className="p-3 font-bold">Farm Location & Area</th>
-                      <th className="p-3 font-bold">Reported Symptom</th>
-                      <th className="p-3 font-bold">Recommended Bio-Remedy</th>
-                      <th className="p-3 font-bold">Status</th>
-                      <th className="p-3 font-bold">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-sridasi-neutral-100">
-                    <tr className="hover:bg-sridasi-surface/60">
-                      <td className="p-3 font-bold text-sridasi-forest">Ramesh Jena</td>
-                      <td className="p-3">Balasore, Odisha (3.0 Acres)</td>
-                      <td className="p-3"><span className="px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">Dissolved O₂ Depletion</span></td>
-                      <td className="p-3 font-semibold text-sridasi-forest">Aquamazic Formula (1L/Acre)</td>
-                      <td className="p-3 text-emerald-700 font-bold">✓ Remedy Applied</td>
-                      <td className="p-3"><button className="text-sridasi-forest font-bold hover:underline">View Log</button></td>
-                    </tr>
-                    <tr className="hover:bg-sridasi-surface/60">
-                      <td className="p-3 font-bold text-sridasi-forest">Suresh Mondal</td>
-                      <td className="p-3">Sundarbans, WB (1.5 Acres)</td>
-                      <td className="p-3"><span className="px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold">High Water Turbidity</span></td>
-                      <td className="p-3 font-semibold text-sridasi-forest">Tribiotic for Animal (2L/Acre)</td>
-                      <td className="p-3 text-amber-700 font-bold">⏳ Dosing In-Progress</td>
-                      <td className="p-3"><button className="text-sridasi-forest font-bold hover:underline">Live Monitor</button></td>
-                    </tr>
-                    <tr className="hover:bg-sridasi-surface/60">
-                      <td className="p-3 font-bold text-sridasi-forest">Balwinder Gill</td>
-                      <td className="p-3">Ludhiana, Punjab (5.0 Acres)</td>
-                      <td className="p-3"><span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold">Crop Soil Health / Floriculture</span></td>
-                      <td className="p-3 font-semibold text-sridasi-forest">Tribiotic for Agriculture</td>
-                      <td className="p-3 text-emerald-700 font-bold">✓ Yield Optimized</td>
-                      <td className="p-3"><button className="text-sridasi-forest font-bold hover:underline">View Farm Plan</button></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-        )}
 
       </Container>
     </section>

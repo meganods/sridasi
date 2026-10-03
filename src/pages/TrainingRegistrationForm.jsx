@@ -21,6 +21,30 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import BRAND_INFO from '../data/brandInfo';
 import Button from '../components/ui/Button';
 import { countries } from '../data/countries';
+const CustomDatePicker = ({ value, onChange, className, disabled }) => {
+  const displayValue = value ? value.split('-').reverse().join('/') : '';
+  
+  return (
+    <div className="relative w-full">
+      <input
+        type="text"
+        placeholder="dd/mm/yyyy"
+        value={displayValue}
+        disabled={disabled}
+        readOnly
+        className={`${className} ${disabled ? '' : 'cursor-pointer'} w-full`}
+      />
+      {!disabled && (
+        <input
+          type="date"
+          value={value || ''}
+          onChange={onChange}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+        />
+      )}
+    </div>
+  );
+};
 
 export function TrainingRegistrationForm() {
   const [formData, setFormData] = useState({
@@ -39,16 +63,35 @@ export function TrainingRegistrationForm() {
     district: '',
     state: '',
 
-    // Buyer Specific Commercial Fields
-    companyName: '',
-    businessType: '',
-    commoditiesRequired: '',
-    monthlyVolume: '',
-    paymentTerms: '',
-    targetPriceRange: '',
-    gstNumber: '',
-    procurementLocation: '',
-    buyerNotes: '',
+    // Buyer Specific Fields
+    businessName: '',
+    whatsappNumber: '',
+    whatsappCountryCode: '+91',
+    buyerCategory: '',
+    buyerCategoryOther: '',
+    productsFish: {
+      liveFish: false, freshFish: false, fingerlings: false, other: ''
+    },
+    preferredFish: '',
+    productsPoultry: {
+      liveChicken: false, eggs: false, countryChicken: false, chicks: false, other: ''
+    },
+    productsAnimals: {
+      goat: false, sheep: false, cow: false, buffalo: false, other: ''
+    },
+    preferredBreed: '',
+    approxQuantity: '',
+    quantityUnit: '',
+    quantityUnitOther: '',
+    purchaseFrequency: '',
+    purchaseDate: '',
+    deliveryOption: '',
+    deliveryLocation: '',
+    paymentPreference: '',
+    paymentPreferenceOther: '',
+    buyerSource: '',
+    buyerSourceOther: '',
+    futureRemarks: '',
 
     // Farmer Specific: 2. Present Situation
     currentOccupation: '',
@@ -145,7 +188,8 @@ export function TrainingRegistrationForm() {
       road: '',
       marketDistance: '',
       security: ''
-    }
+    },
+    declarationAccepted: false
   });
 
   const [errors, setErrors] = useState({});
@@ -153,10 +197,17 @@ export function TrainingRegistrationForm() {
   const [countrySearchQuery, setCountrySearchQuery] = useState('');
   const countryDropdownRef = useRef(null);
 
+  const [isWaCountryDropdownOpen, setIsWaCountryDropdownOpen] = useState(false);
+  const [waCountrySearchQuery, setWaCountrySearchQuery] = useState('');
+  const waCountryDropdownRef = useRef(null);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
         setIsCountryDropdownOpen(false);
+      }
+      if (waCountryDropdownRef.current && !waCountryDropdownRef.current.contains(event.target)) {
+        setIsWaCountryDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -168,6 +219,11 @@ export function TrainingRegistrationForm() {
   const filteredCountries = countries.filter(c =>
     c.label.toLowerCase().includes(countrySearchQuery.toLowerCase()) ||
     c.code.includes(countrySearchQuery)
+  );
+
+  const filteredWaCountries = countries.filter(c =>
+    c.label.toLowerCase().includes(waCountrySearchQuery.toLowerCase()) ||
+    c.code.includes(waCountrySearchQuery)
   );
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -209,6 +265,22 @@ export function TrainingRegistrationForm() {
       errs.mobileNumber = 'Enter a valid 10-digit mobile number';
     } else if (cleanPhone.length < 7 || cleanPhone.length > 15) {
       errs.mobileNumber = 'Enter a valid mobile number';
+    }
+
+    if (formData.emailId.trim() && !formData.emailId.includes('@')) {
+      errs.emailId = 'Please enter a valid email address containing an @ sign';
+    }
+
+    if (formData.role === 'buyer') {
+      if (!formData.declarationAccepted) {
+        errs.declarationAccepted = 'You must accept the declaration to submit';
+      }
+      if (!formData.buyerSignature || !formData.buyerSignature.trim()) {
+        errs.buyerSignature = 'Signature is required';
+      }
+      if (!formData.buyerSignatureDate) {
+        errs.buyerSignatureDate = 'Date is required';
+      }
     }
 
     // Removed buyer specific validation since UI fields don't exist yet
@@ -473,7 +545,7 @@ export function TrainingRegistrationForm() {
           <form onSubmit={handleSubmit} noValidate className="space-y-6 text-xs text-left">
 
             {/* 2-Column Responsive Layout */}
-            <div className="columns-1 md:columns-2 gap-6 print-columns w-full">
+            <div className="columns-1 md:columns-2 gap-6 print:flex print:flex-col w-full">
 
               {/* 1. PERSONAL INFORMATION */}
               <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
@@ -527,41 +599,60 @@ export function TrainingRegistrationForm() {
                     {errors.fullName && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.fullName}</p>}
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
-                    <label className="text-sridasi-neutral-700 font-semibold">
-                      2. Educational Qualification
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.qualification}
-                      onChange={(e) => handleChange('qualification', e.target.value)}
-                      placeholder="e.g. Graduate / B.Sc / Diploma / High School"
-                      className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.qualification ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
-                    />
-                    {errors.qualification && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.qualification}</p>}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col w-full gap-1">
-                      <label className="text-sridasi-neutral-700 font-semibold">3. Preferred Language:</label>
-                      <select
-                        value={formData.preferredLanguage}
-                        onChange={(e) => handleChange('preferredLanguage', e.target.value)}
-                        className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
-                      >
-                        <option value="" disabled>Select language...</option>
-                        <option>Hindi</option>
-                        <option>English</option>
-                        <option>Bengali</option>
-                        <option>Odia</option>
-                        <option>Punjabi</option>
-                        <option>Marathi</option>
-                      </select>
-                    </div>
-
+                  {formData.role === 'buyer' && (
                     <div className="flex flex-col w-full gap-1">
                       <label className="text-sridasi-neutral-700 font-semibold">
-                        4. Mobile / WhatsApp <span className="text-red-500">*</span>
+                        Business/Farm Name
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.businessName}
+                        onChange={(e) => handleChange('businessName', e.target.value)}
+                        placeholder="e.g. Verma Farms / Fresh Meats"
+                        className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.businessName ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                      />
+                    </div>
+                  )}
+
+                  {formData.role === 'farmer' && (
+                    <>
+                      <div className="flex flex-col w-full gap-1 mt-2">
+                        <label className="text-sridasi-neutral-700 font-semibold">
+                          2. Educational Qualification
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.qualification}
+                          onChange={(e) => handleChange('qualification', e.target.value)}
+                          placeholder="e.g. Graduate / B.Sc / Diploma / High School"
+                          className={`w-full p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.qualification ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'}`}
+                        />
+                        {errors.qualification && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.qualification}</p>}
+                      </div>
+
+                      <div className="flex flex-col w-full gap-1 mt-2 mb-2">
+                        <label className="text-sridasi-neutral-700 font-semibold">3. Preferred Language:</label>
+                        <select
+                          value={formData.preferredLanguage}
+                          onChange={(e) => handleChange('preferredLanguage', e.target.value)}
+                          className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        >
+                          <option value="" disabled>Select language...</option>
+                          <option>Hindi</option>
+                          <option>English</option>
+                          <option>Bengali</option>
+                          <option>Odia</option>
+                          <option>Punjabi</option>
+                          <option>Marathi</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="flex flex-col w-full gap-1">
+                      <label className="text-sridasi-neutral-700 font-semibold">
+                        {formData.role === 'farmer' ? '4. ' : '2. '}Mobile <span className="text-red-500">*</span>
                       </label>
                       <div className={`relative flex rounded-xl bg-white border focus-within:border-sridasi-forest focus-within:ring-1 focus-within:ring-sridasi-forest/30 transition-all ${errors.mobileNumber ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200'
                         }`} ref={countryDropdownRef}>
@@ -622,11 +713,74 @@ export function TrainingRegistrationForm() {
                       </div>
                       {errors.mobileNumber && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.mobileNumber}</p>}
                     </div>
+                    {formData.role === 'buyer' && (
+                      <div className="flex flex-col w-full gap-1">
+                        <label className="text-sridasi-neutral-700 font-semibold">
+                          WhatsApp No.
+                        </label>
+                        <div className={`relative flex rounded-xl bg-white border focus-within:border-sridasi-forest focus-within:ring-1 focus-within:ring-sridasi-forest/30 transition-all border-sridasi-neutral-200`} ref={waCountryDropdownRef}>
+
+                          <div
+                            className="flex items-center gap-1.5 bg-transparent border-r border-sridasi-neutral-200 text-sridasi-forest rounded-l-xl px-3 py-2 cursor-pointer font-medium select-none hover:bg-sridasi-neutral-50 shrink-0 min-w-max"
+                            onClick={() => setIsWaCountryDropdownOpen(!isWaCountryDropdownOpen)}
+                          >
+                            <span className="whitespace-nowrap">{countries.find(c => c.code === formData.whatsappCountryCode)?.label.split(' ')[0]} {formData.whatsappCountryCode}</span>
+                            <span className="text-[10px] ml-0.5">▼</span>
+                          </div>
+
+                          {isWaCountryDropdownOpen && (
+                            <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-sridasi-neutral-200 rounded-xl shadow-lg z-50 flex flex-col max-h-64 overflow-hidden">
+                              <div className="p-2 border-b border-sridasi-neutral-100">
+                                <input
+                                  type="text"
+                                  placeholder="Search country..."
+                                  value={waCountrySearchQuery}
+                                  onChange={(e) => setWaCountrySearchQuery(e.target.value)}
+                                  className="w-full p-1.5 text-sm rounded bg-sridasi-neutral-50 border border-sridasi-neutral-200 focus:outline-none focus:border-sridasi-forest"
+                                  autoFocus
+                                />
+                              </div>
+                              <div className="overflow-y-auto flex-1">
+                                {filteredWaCountries.map((c, i) => (
+                                  <div
+                                    key={i}
+                                    className="px-3 py-2 text-sm hover:bg-sridasi-forest/5 cursor-pointer flex items-center gap-2 text-sridasi-neutral-700"
+                                    onClick={() => {
+                                      handleChange('whatsappCountryCode', c.code);
+                                      setIsWaCountryDropdownOpen(false);
+                                      setWaCountrySearchQuery('');
+                                    }}
+                                  >
+                                    <span>{c.label}</span>
+                                    <span className="text-sridasi-neutral-400 text-xs ml-auto">{c.code}</span>
+                                  </div>
+                                ))}
+                                {filteredWaCountries.length === 0 && (
+                                  <div className="px-3 py-2 text-sm text-sridasi-neutral-400 text-center">No countries found</div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          <input
+                            type="tel"
+                            value={formData.whatsappNumber}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              const maxLength = formData.whatsappCountryCode === '+91' ? 10 : 15;
+                              handleChange('whatsappNumber', val.slice(0, maxLength));
+                            }}
+                            placeholder="98765 43210"
+                            className="w-full p-2 bg-transparent text-sridasi-forest focus:outline-none rounded-r-xl"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
+                  <div className="flex flex-col w-full gap-1 mt-2">
                     <label className="text-sridasi-neutral-700 font-semibold">
-                      5. Email ID
+                      {formData.role === 'farmer' ? '5. ' : '3. '}Email ID
                     </label>
                     <input
                       type="email"
@@ -638,9 +792,9 @@ export function TrainingRegistrationForm() {
                     {errors.emailId && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.emailId}</p>}
                   </div>
 
-                  <div className="flex flex-col w-full gap-1">
+                  <div className="flex flex-col w-full gap-1 mt-2">
                     <label className="text-sridasi-neutral-700 font-semibold">
-                      6. Complete Address
+                      {formData.role === 'farmer' ? '6. ' : '4. '}Complete Address
                     </label>
                     <textarea
                       rows={2}
@@ -651,9 +805,373 @@ export function TrainingRegistrationForm() {
                     />
                     {errors.completeAddress && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.completeAddress}</p>}
                   </div>
+
+                  {formData.role === 'buyer' && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div className="flex flex-col w-full gap-1">
+                        <label className="text-sridasi-neutral-700 font-semibold">
+                          Village/City
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.villageTown}
+                          onChange={(e) => handleChange('villageTown', e.target.value)}
+                          className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        />
+                      </div>
+                      <div className="flex flex-col w-full gap-1">
+                        <label className="text-sridasi-neutral-700 font-semibold">
+                          District
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.district}
+                          onChange={(e) => handleChange('district', e.target.value)}
+                          className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        />
+                      </div>
+                      <div className="flex flex-col w-full gap-1 col-span-2">
+                        <label className="text-sridasi-neutral-700 font-semibold">
+                          State
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.state}
+                          onChange={(e) => handleChange('state', e.target.value)}
+                          className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
+
+              {formData.role === 'buyer' && (
+                <>
+                  {/* 2. BUYER CATEGORY */}
+                  <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                    <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
+                      2. BUYER CATEGORY
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {['Individual Consumer', 'Farmer', 'Retailer', 'Wholesaler', 'Hotel/Restaurant', 'Meat/Fish Shop', 'Poultry Shop', 'Institutional Buyer'].map((cat) => (
+                        <label key={cat} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="buyerCategory"
+                            value={cat}
+                            checked={formData.buyerCategory === cat}
+                            onChange={(e) => handleChange('buyerCategory', e.target.value)}
+                            className="text-sridasi-forest"
+                          />
+                          {cat}
+                        </label>
+                      ))}
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="buyerCategory"
+                          value="Other"
+                          checked={formData.buyerCategory === 'Other'}
+                          onChange={(e) => handleChange('buyerCategory', e.target.value)}
+                          className="text-sridasi-forest"
+                        />
+                        Other
+                      </label>
+                    </div>
+                    {formData.buyerCategory === 'Other' && (
+                      <input
+                        type="text"
+                        value={formData.buyerCategoryOther}
+                        onChange={(e) => handleChange('buyerCategoryOther', e.target.value)}
+                        placeholder="Please specify"
+                        className="w-full mt-2 p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                      />
+                    )}
+                  </div>
+
+                  {/* 3. PRODUCTS INTERESTED IN */}
+                  <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                    <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
+                      3. PRODUCTS INTERESTED IN
+                    </div>
+                    
+                    {/* Fish */}
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-sridasi-neutral-700">Fish</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs pl-2">
+                        {Object.keys(formData.productsFish).filter(k => k !== 'other').map((key) => (
+                          <label key={key} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formData.productsFish[key]}
+                              onChange={() => handleNestedCheck('productsFish', key)}
+                              className="text-sridasi-forest rounded"
+                            />
+                            {key === 'liveFish' ? 'Live Fish' : key === 'freshFish' ? 'Fresh Fish' : key === 'fingerlings' ? 'Fingerlings' : key}
+                          </label>
+                        ))}
+                      </div>
+                      <div className="pl-2 mt-1">
+                        <input
+                          type="text"
+                          value={formData.productsFish.other}
+                          onChange={(e) => setFormData(prev => ({ ...prev, productsFish: { ...prev.productsFish, other: e.target.value } }))}
+                          placeholder="Other fish..."
+                          className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                        />
+                      </div>
+                      <div className="pl-2 mt-1 flex flex-col gap-1">
+                        <label className="text-xs text-sridasi-neutral-700">Preferred Fish:</label>
+                        <input
+                          type="text"
+                          value={formData.preferredFish}
+                          onChange={(e) => handleChange('preferredFish', e.target.value)}
+                          placeholder="e.g. Rohu, Katla"
+                          className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Poultry */}
+                    <div className="space-y-1 mt-3">
+                      <h4 className="font-semibold text-sridasi-neutral-700">Poultry</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs pl-2">
+                        {Object.keys(formData.productsPoultry).filter(k => k !== 'other').map((key) => (
+                          <label key={key} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formData.productsPoultry[key]}
+                              onChange={() => handleNestedCheck('productsPoultry', key)}
+                              className="text-sridasi-forest rounded"
+                            />
+                            {key === 'liveChicken' ? 'Live Chicken' : key === 'eggs' ? 'Eggs' : key === 'countryChicken' ? 'Country/Desi Chicken' : key === 'chicks' ? 'Chicks' : key}
+                          </label>
+                        ))}
+                      </div>
+                      <div className="pl-2 mt-1">
+                        <input
+                          type="text"
+                          value={formData.productsPoultry.other}
+                          onChange={(e) => setFormData(prev => ({ ...prev, productsPoultry: { ...prev.productsPoultry, other: e.target.value } }))}
+                          placeholder="Other poultry..."
+                          className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Animals */}
+                    <div className="space-y-1 mt-3">
+                      <h4 className="font-semibold text-sridasi-neutral-700">Animals</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs pl-2">
+                        {Object.keys(formData.productsAnimals).filter(k => k !== 'other').map((key) => (
+                          <label key={key} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formData.productsAnimals[key]}
+                              onChange={() => handleNestedCheck('productsAnimals', key)}
+                              className="text-sridasi-forest rounded"
+                            />
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                          </label>
+                        ))}
+                      </div>
+                      <div className="pl-2 mt-1 flex flex-col gap-1">
+                        <label className="text-xs text-sridasi-neutral-700">Breed/Type preferred:</label>
+                        <input
+                          type="text"
+                          value={formData.preferredBreed}
+                          onChange={(e) => handleChange('preferredBreed', e.target.value)}
+                          placeholder="e.g. Black Bengal, Murrah"
+                          className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4. PURCHASE REQUIREMENT */}
+                  <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                    <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
+                      4. PURCHASE REQUIREMENT
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-sridasi-neutral-700">Approx Quantity:</label>
+                        <input
+                          type="text"
+                          value={formData.approxQuantity}
+                          onChange={(e) => handleChange('approxQuantity', e.target.value)}
+                          className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-sridasi-neutral-700">Unit:</label>
+                        <select
+                          value={formData.quantityUnit}
+                          onChange={(e) => handleChange('quantityUnit', e.target.value)}
+                          className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                        >
+                          <option value="">Select unit</option>
+                          <option value="Kg">Kg</option>
+                          <option value="Nos.">Nos.</option>
+                          <option value="Litres">Litres</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    {formData.quantityUnit === 'Other' && (
+                      <input
+                        type="text"
+                        value={formData.quantityUnitOther}
+                        onChange={(e) => handleChange('quantityUnitOther', e.target.value)}
+                        placeholder="Specify unit"
+                        className="w-full mt-1 text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                      />
+                    )}
+
+                    <div className="flex flex-col gap-1 mt-2">
+                      <label className="text-xs font-semibold text-sridasi-neutral-700">Expected Purchase Frequency:</label>
+                      <div className="flex flex-wrap gap-4 text-xs">
+                        {['Daily', 'Weekly', 'Monthly', 'Occasional'].map(freq => (
+                          <label key={freq} className="flex items-center gap-1 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="purchaseFrequency"
+                              value={freq}
+                              checked={formData.purchaseFrequency === freq}
+                              onChange={(e) => handleChange('purchaseFrequency', e.target.value)}
+                              className="text-sridasi-forest"
+                            />
+                            {freq}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 mt-2">
+                      <label className="text-xs font-semibold text-sridasi-neutral-700">Expected Purchase Date:</label>
+                      <CustomDatePicker
+                        value={formData.purchaseDate}
+                        onChange={(e) => handleChange('purchaseDate', e.target.value)}
+                        className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 5. DELIVERY / COLLECTION */}
+                  <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                    <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
+                      5. DELIVERY / COLLECTION
+                    </div>
+                    <div className="flex flex-col gap-2 text-xs">
+                      {['Farm Pickup', 'Farm Delivery', 'Transport Required'].map(opt => (
+                        <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="deliveryOption"
+                            value={opt}
+                            checked={formData.deliveryOption === opt}
+                            onChange={(e) => handleChange('deliveryOption', e.target.value)}
+                            className="text-sridasi-forest"
+                          />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                    <div className="flex flex-col gap-1 mt-2">
+                      <label className="text-xs font-semibold text-sridasi-neutral-700">Delivery Location:</label>
+                      <input
+                        type="text"
+                        value={formData.deliveryLocation}
+                        onChange={(e) => handleChange('deliveryLocation', e.target.value)}
+                        placeholder="Full address for delivery"
+                        className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 6. PAYMENT PREFERENCE */}
+                  <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                    <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
+                      6. PAYMENT PREFERENCE
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {['Cash', 'UPI', 'Bank Transfer', 'Other'].map(opt => (
+                        <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="paymentPreference"
+                            value={opt}
+                            checked={formData.paymentPreference === opt}
+                            onChange={(e) => handleChange('paymentPreference', e.target.value)}
+                            className="text-sridasi-forest"
+                          />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                    {formData.paymentPreference === 'Other' && (
+                      <input
+                        type="text"
+                        value={formData.paymentPreferenceOther}
+                        onChange={(e) => handleChange('paymentPreferenceOther', e.target.value)}
+                        placeholder="Specify payment method"
+                        className="w-full mt-2 text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                      />
+                    )}
+                  </div>
+
+                  {/* 7. BUYER SOURCE */}
+                  <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                    <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
+                      7. BUYER SOURCE
+                    </div>
+                    <label className="text-xs font-semibold text-sridasi-neutral-700">How did you hear about us?</label>
+                    <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                      {['Farm Visit', 'Referral', 'WhatsApp', 'Facebook/Instagram', 'Exhibition/Event', 'Training Program', 'Other'].map(src => (
+                        <label key={src} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="buyerSource"
+                            value={src}
+                            checked={formData.buyerSource === src}
+                            onChange={(e) => handleChange('buyerSource', e.target.value)}
+                            className="text-sridasi-forest"
+                          />
+                          {src}
+                        </label>
+                      ))}
+                    </div>
+                    {formData.buyerSource === 'Other' && (
+                      <input
+                        type="text"
+                        value={formData.buyerSourceOther}
+                        onChange={(e) => handleChange('buyerSourceOther', e.target.value)}
+                        placeholder="Specify source"
+                        className="w-full mt-2 text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200"
+                      />
+                    )}
+                  </div>
+
+                  {/* 8. FUTURE REQUIREMENT / REMARKS */}
+                  <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
+                    <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
+                      8. FUTURE REQUIREMENT / REMARKS
+                    </div>
+                    <textarea
+                      rows={3}
+                      value={formData.futureRemarks}
+                      onChange={(e) => handleChange('futureRemarks', e.target.value)}
+                      placeholder="Any specific remarks or future requirements..."
+                      className="w-full mt-2 p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
+                    />
+                  </div>
+                </>
+              )}
+
+              {formData.role === 'farmer' && (
+                <>
               {/* 2. YOUR PRESENT SITUATION */}
               <div className="break-inside-avoid mb-6 p-4 rounded-2xl bg-sridasi-surface border border-sridasi-neutral-200 space-y-3 print-section">
                 <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
@@ -1350,12 +1868,96 @@ export function TrainingRegistrationForm() {
                     /></div>
                 </div>
               </div>
+                </>
+              )}
             </div>
+            {/* Signature & Office Use - Buyer Only */}
+            {formData.role === 'buyer' && (
+              <div className="space-y-6 pt-8 mt-8 border-t border-sridasi-neutral-300">
+                <div className="mb-6">
+                  <h4 className="font-bold text-sridasi-forest mb-2">Buyer Declaration <span className="text-red-500">*</span></h4>
+                  <label className="flex items-start gap-2 cursor-pointer mb-8">
+                    <input
+                      type="checkbox"
+                      checked={formData.declarationAccepted}
+                      onChange={(e) => handleChange('declarationAccepted', e.target.checked)}
+                      className="mt-0.5 rounded border-sridasi-neutral-300 text-sridasi-forest focus:ring-sridasi-forest w-4 h-4 shrink-0"
+                    />
+                    <div>
+                      <p className="text-xs text-sridasi-neutral-700 italic">
+                        I confirm that the information provided above is correct and may be used by SriDasi Farms & Organics for product availability, quotations, orders and future communication.
+                      </p>
+                      {errors.declarationAccepted && <p className="text-[10px] text-red-600 mt-1 font-medium not-italic">{errors.declarationAccepted}</p>}
+                    </div>
+                  </label>
+                  <div className="flex justify-between gap-8">
+                    <div className="w-1/2 flex flex-col gap-1">
+                      <label className="text-[10px] text-sridasi-neutral-500 font-bold">Buyer Signature <span className="text-red-500">*</span></label>
+                      <input 
+                        type="text" 
+                        value={formData.buyerSignature || ''}
+                        onChange={(e) => handleChange('buyerSignature', e.target.value)}
+                        placeholder="Type your full name"
+                        className="border border-sridasi-neutral-300 bg-white rounded focus:outline-none focus:border-sridasi-forest text-sm px-2 py-1.5"
+                      />
+                      {errors.buyerSignature && <p className="text-[10px] text-red-600 font-medium">{errors.buyerSignature}</p>}
+                    </div>
+                    <div className="w-1/3 flex flex-col gap-1">
+                      <label className="text-[10px] text-sridasi-neutral-500 font-bold">Date <span className="text-red-500">*</span></label>
+                      <CustomDatePicker
+                        value={formData.buyerSignatureDate || ''}
+                        onChange={(e) => handleChange('buyerSignatureDate', e.target.value)}
+                        className="border border-sridasi-neutral-300 bg-white rounded focus:outline-none focus:border-sridasi-forest text-sm px-2 py-1.5"
+                      />
+                      {errors.buyerSignatureDate && <p className="text-[10px] text-red-600 font-medium">{errors.buyerSignatureDate}</p>}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-8 p-4 border-2 border-sridasi-neutral-300 rounded-xl bg-sridasi-neutral-50">
+                  <h4 className="font-bold text-sridasi-forest mb-4 uppercase text-center border-b pb-2 border-sridasi-neutral-200">For Farm Use</h4>
+                  <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label className="font-semibold text-sridasi-neutral-700">Buyer ID:</label> 
+                      <input type="text" disabled className="border border-sridasi-neutral-300 bg-sridasi-neutral-200/60 rounded px-2 py-1.5 w-full max-w-[200px] cursor-not-allowed text-sridasi-neutral-500" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="font-semibold text-sridasi-neutral-700">Registration Date:</label> 
+                      <CustomDatePicker disabled className="border border-sridasi-neutral-300 bg-sridasi-neutral-200/60 rounded px-2 py-1.5 w-full max-w-[200px] cursor-not-allowed text-sridasi-neutral-500" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="font-semibold text-sridasi-neutral-700">Assigned By:</label> 
+                      <input type="text" disabled className="border border-sridasi-neutral-300 bg-sridasi-neutral-200/60 rounded px-2 py-1.5 w-full max-w-[200px] cursor-not-allowed text-sridasi-neutral-500" />
+                    </div>
+                    <div className="flex flex-col gap-2 justify-center">
+                      <span className="font-semibold text-sridasi-neutral-700">Lead Type:</span> 
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Retail</label>
+                        <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> B2B</label>
+                        <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Wholesale</label>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="font-semibold text-sridasi-neutral-700">Follow-up Date:</label> 
+                      <CustomDatePicker disabled className="border border-sridasi-neutral-300 bg-sridasi-neutral-200/60 rounded px-2 py-1.5 w-full max-w-[200px] cursor-not-allowed text-sridasi-neutral-500" />
+                    </div>
+                    <div className="flex flex-col gap-2 justify-center col-span-2">
+                      <span className="font-semibold text-sridasi-neutral-700">Status:</span> 
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> New</label>
+                        <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Follow-up</label>
+                        <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Converted</label>
+                        <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Closed</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Submission Bar (Hidden during Print) */}
             <div className="pt-6 border-t-2 border-sridasi-forest flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
-              <div className="text-xs text-sridasi-neutral-600">
-                <span className="font-bold text-sridasi-forest">Declaration:</span> {formData.role === 'buyer' ? 'All commercial information provided is accurate for contract sourcing & procurement.' : 'All information provided is accurate for 3-Day Residential Training planning.'}
+              <div className="text-xs text-sridasi-neutral-600 max-w-xl">
+                {/* Declaration is now placed above in the form */}
               </div>
 
               <div className="flex items-center justify-end w-full sm:w-auto">

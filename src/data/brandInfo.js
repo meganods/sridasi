@@ -13,6 +13,8 @@ export const BRAND_INFO = {
   coreMotto: 'Healthy Farms • Healthy Food • Healthy People • A Greener Tomorrow',
   description: 'Cutting-edge digital solutions, 3-day residential training programmes, and advanced bio-formulations for aquaculture, livestock, agriculture, and holistic wellness.',
   
+  contactEmail: 'support@sridasi.in',
+  
   vision: 'Our aspiration is to lead the aquaculture & natural farming industry in the blue revolution by harnessing the power of big data, biological science, and integrated circular bio-economies.',
   
   values: [
