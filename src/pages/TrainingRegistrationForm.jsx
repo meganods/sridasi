@@ -21,6 +21,58 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import BRAND_INFO from '../data/brandInfo';
 import Button from '../components/ui/Button';
 import { countries } from '../data/countries';
+
+const CustomSelect = ({ value, onChange, options, placeholder, className }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => typeof opt === 'string' ? opt === value : opt.value === value);
+  const displayLabel = selectedOption ? (typeof selectedOption === 'string' ? selectedOption : selectedOption.label) : placeholder;
+
+  // Use the passed className for the outer container so sizing (like w-24 or flex-1) applies correctly.
+  return (
+    <div className={`relative ${className}`} ref={dropdownRef}>
+      <div
+        className="flex w-full h-full items-center justify-between cursor-pointer select-none"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={`truncate ${value ? '' : 'text-sridasi-neutral-400'}`}>{displayLabel}</span>
+        <span className="text-[10px] ml-1 shrink-0 text-sridasi-neutral-500">▼</span>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 min-w-full bg-white border border-sridasi-neutral-200 rounded-xl shadow-lg z-[60] max-h-60 overflow-y-auto">
+          {options.map((opt, i) => {
+            const optValue = typeof opt === 'string' ? opt : opt.value;
+            const optLabel = typeof opt === 'string' ? opt : opt.label;
+            return (
+              <div
+                key={i}
+                className={`px-3 py-2 text-xs sm:text-sm hover:bg-sridasi-forest/10 cursor-pointer transition-colors ${value === optValue ? 'bg-sridasi-leaf-50 text-sridasi-forest font-bold' : 'text-sridasi-neutral-700'}`}
+                onClick={() => {
+                  onChange({ target: { value: optValue } });
+                  setIsOpen(false);
+                }}
+              >
+                {optLabel}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 const CustomDatePicker = ({ value, onChange, className, disabled }) => {
   const displayValue = value ? value.split('-').reverse().join('/') : '';
   
@@ -632,24 +684,18 @@ export function TrainingRegistrationForm() {
 
                       <div className="flex flex-col w-full gap-1 mt-2 mb-2">
                         <label className="text-sridasi-neutral-700 font-semibold">3. Preferred Language:</label>
-                        <select
+                        <CustomSelect
                           value={formData.preferredLanguage}
                           onChange={(e) => handleChange('preferredLanguage', e.target.value)}
+                          options={['Hindi', 'English', 'Bengali', 'Odia', 'Punjabi', 'Marathi']}
+                          placeholder="Select language..."
                           className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
-                        >
-                          <option value="" disabled>Select language...</option>
-                          <option>Hindi</option>
-                          <option>English</option>
-                          <option>Bengali</option>
-                          <option>Odia</option>
-                          <option>Punjabi</option>
-                          <option>Marathi</option>
-                        </select>
+                        />
                       </div>
                     </>
                   )}
 
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                     <div className="flex flex-col w-full gap-1">
                       <label className="text-sridasi-neutral-700 font-semibold">
                         {formData.role === 'farmer' ? '4. ' : '2. '}Mobile <span className="text-red-500">*</span>
@@ -807,7 +853,7 @@ export function TrainingRegistrationForm() {
                   </div>
 
                   {formData.role === 'buyer' && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                       <div className="flex flex-col w-full gap-1">
                         <label className="text-sridasi-neutral-700 font-semibold">
                           Village/City
@@ -830,7 +876,7 @@ export function TrainingRegistrationForm() {
                           className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
                         />
                       </div>
-                      <div className="flex flex-col w-full gap-1 col-span-2">
+                      <div className="flex flex-col w-full gap-1 sm:col-span-2">
                         <label className="text-sridasi-neutral-700 font-semibold">
                           State
                         </label>
@@ -995,7 +1041,7 @@ export function TrainingRegistrationForm() {
                     <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                       4. PURCHASE REQUIREMENT
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-sridasi-neutral-700">Approx Quantity:</label>
                         <input
@@ -1007,17 +1053,13 @@ export function TrainingRegistrationForm() {
                       </div>
                       <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-sridasi-neutral-700">Unit:</label>
-                        <select
+                        <CustomSelect
                           value={formData.quantityUnit}
                           onChange={(e) => handleChange('quantityUnit', e.target.value)}
+                          options={['Kg', 'Nos.', 'Litres', 'Other']}
+                          placeholder="Select unit"
                           className="w-full text-xs p-1.5 rounded bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
-                        >
-                          <option value="">Select unit</option>
-                          <option value="Kg">Kg</option>
-                          <option value="Nos.">Nos.</option>
-                          <option value="Litres">Litres</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        />
                       </div>
                     </div>
                     {formData.quantityUnit === 'Other' && (
@@ -1096,7 +1138,7 @@ export function TrainingRegistrationForm() {
                     <div className="font-heading font-bold text-sm text-sridasi-forest bg-sridasi-leaf-100/80 px-3 py-1 rounded-lg border border-sridasi-leaf-200">
                       6. PAYMENT PREFERENCE
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                       {['Cash', 'UPI', 'Bank Transfer', 'Other'].map(opt => (
                         <label key={opt} className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -1128,7 +1170,7 @@ export function TrainingRegistrationForm() {
                       7. BUYER SOURCE
                     </div>
                     <label className="text-xs font-semibold text-sridasi-neutral-700">How did you hear about us?</label>
-                    <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mt-2">
                       {['Farm Visit', 'Referral', 'WhatsApp', 'Facebook/Instagram', 'Exhibition/Event', 'Training Program', 'Other'].map(src => (
                         <label key={src} className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -1194,7 +1236,7 @@ export function TrainingRegistrationForm() {
 
                 <div>
                   <label className="block text-sridasi-neutral-700 font-semibold mb-1">8. What are your main challenges or constraints?</label>
-                  <div className="grid grid-cols-2 gap-y-2 gap-x-1.5 text-[11px]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-1.5 text-[11px]">
                     {['land', 'water', 'electricity', 'labour', 'finance', 'marketing', 'technicalKnowledge'].map((ch) => (
                       <label key={ch} className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest">
                         <input
@@ -1206,7 +1248,7 @@ export function TrainingRegistrationForm() {
                         <span className="capitalize font-medium">{ch.replace(/([A-Z])/g, ' $1')}</span>
                       </label>
                     ))}
-                    <div className="col-span-2 flex items-center gap-2 mt-1">
+                    <div className="sm:col-span-2 flex items-center gap-2 mt-1">
                       <label className="flex items-center gap-1.5 cursor-pointer hover:text-sridasi-forest shrink-0">
                         <input
                           type="checkbox"
@@ -1267,17 +1309,13 @@ export function TrainingRegistrationForm() {
                         className={`flex-1 min-w-0 p-2 rounded-xl bg-white border text-sridasi-forest focus:outline-none ${errors.totalLand ? 'border-red-500 bg-red-50/20' : 'border-sridasi-neutral-200 focus:border-sridasi-forest'
                           }`}
                       />
-                      <select
+                      <CustomSelect
                         value={formData.landUnit}
                         onChange={(e) => handleChange('landUnit', e.target.value)}
+                        options={['Acres', 'Bigha', 'Hectares', 'Sq. Ft.']}
+                        placeholder="Unit"
                         className="w-24 shrink-0 p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
-                      >
-                        <option value="" disabled>Unit</option>
-                        <option>Acres</option>
-                        <option>Bigha</option>
-                        <option>Hectares</option>
-                        <option>Sq. Ft.</option>
-                      </select>
+                      />
                     </div>
                     {errors.totalLand && <p className="text-[10px] text-red-600 mt-0.5 font-medium">{errors.totalLand}</p>}
                   </div>
@@ -1317,7 +1355,7 @@ export function TrainingRegistrationForm() {
 
                 <div>
                   <label className="block text-sridasi-neutral-700 font-semibold mb-1">13. Water Source Available:</label>
-                  <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[11px]">
                     {['borewell', 'pond', 'canal', 'river', 'rainwater'].map((w) => (
                       <label key={w} className="flex items-center gap-1.5 cursor-pointer">
                         <input
@@ -1332,18 +1370,16 @@ export function TrainingRegistrationForm() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div className="flex flex-col w-full gap-1">
                     <label className="text-sridasi-neutral-700 font-semibold">14. Borewell Elec.:</label>
-                    <select
+                    <CustomSelect
                       value={formData.borewellElectricity}
                       onChange={(e) => handleChange('borewellElectricity', e.target.value)}
+                      options={['Yes', 'No']}
+                      placeholder="Select..."
                       className="w-full p-2 rounded-xl bg-white border border-sridasi-neutral-200 text-sridasi-forest focus:outline-none focus:border-sridasi-forest"
-                    >
-                      <option value="" disabled>Select...</option>
-                      <option>Yes</option>
-                      <option>No</option>
-                    </select>
+                    />
                   </div>
                   <div className="flex flex-col w-full gap-1">
                     <label className="text-sridasi-neutral-700 font-semibold">Pipe Size:</label>
@@ -1374,7 +1410,7 @@ export function TrainingRegistrationForm() {
                   4. FARM LOCATION & SECURITY
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div className="flex flex-col w-full gap-1">
                     <label className="text-sridasi-neutral-700 font-semibold">
                       16. Village / Town
@@ -1413,7 +1449,7 @@ export function TrainingRegistrationForm() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div className="flex flex-col w-full gap-1">
                     <label className="text-sridasi-neutral-700 font-semibold">
                       17. Distance from Main Road
@@ -1587,7 +1623,7 @@ export function TrainingRegistrationForm() {
 
                 <div>
                   <label className="block text-sridasi-neutral-700 font-semibold mb-1">24. What facilities are available?</label>
-                  <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[11px]">
                     {[
                       { key: 'tractor', label: 'Tractor' },
                       { key: 'miniTruck', label: 'Mini-Truck' },
@@ -1609,7 +1645,7 @@ export function TrainingRegistrationForm() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div className="flex flex-col w-full gap-1">
                     <label className="text-sridasi-neutral-700 font-semibold">
                       25. Dist. All-Weather Road
@@ -1645,7 +1681,7 @@ export function TrainingRegistrationForm() {
                   7. FINANCIAL CAPACITY
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div className="flex flex-col w-full gap-1">
                     <label className="text-sridasi-neutral-700 font-semibold">
                       27. Annual Family Income
@@ -1818,54 +1854,62 @@ export function TrainingRegistrationForm() {
                     10. YOUR FARM AT A GLANCE
                   </h3>
 
-                  <div className="grid grid-cols-[auto_1fr_auto_1fr] gap-x-3 gap-y-4 text-xs font-semibold text-sridasi-neutral-800 items-end">
-                    <span className="shrink-0 pb-1">Land:</span>
-                    <input
-                      type="text"
-                      value={formData.farmAtAGlance.land}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, land: e.target.value } }))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0"
-                    />
-
-                    <span className="shrink-0 pb-1 pl-2">Water:</span>
-                    <input
-                      type="text"
-                      value={formData.farmAtAGlance.water}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, water: e.target.value } }))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0"
-                    />
-
-                    <span className="shrink-0 pb-1">Electricity:</span>
-                    <input
-                      type="text"
-                      value={formData.farmAtAGlance.electricity}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, electricity: e.target.value } }))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0"
-                    />
-
-                    <span className="shrink-0 pb-1 pl-2">Road:</span>
-                    <input
-                      type="text"
-                      value={formData.farmAtAGlance.road}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, road: e.target.value } }))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0"
-                    />
-
-                    <span className="shrink-0 pb-1">Market Distance:</span>
-                    <input
-                      type="text"
-                      value={formData.farmAtAGlance.marketDistance}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, marketDistance: e.target.value } }))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0"
-                    />
-
-                    <span className="shrink-0 pb-1 pl-2">Security:</span>
-                    <input
-                      type="text"
-                      value={formData.farmAtAGlance.security}
-                      onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, security: e.target.value } }))}
-                      className="border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 w-full min-w-0"
-                    /></div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-xs font-semibold text-sridasi-neutral-800">
+                    <div className="flex items-end gap-2">
+                      <span className="shrink-0 pb-1">Land:</span>
+                      <input
+                        type="text"
+                        value={formData.farmAtAGlance.land}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, land: e.target.value } }))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 min-w-0"
+                      />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="shrink-0 pb-1">Water:</span>
+                      <input
+                        type="text"
+                        value={formData.farmAtAGlance.water}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, water: e.target.value } }))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 min-w-0"
+                      />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="shrink-0 pb-1">Electricity:</span>
+                      <input
+                        type="text"
+                        value={formData.farmAtAGlance.electricity}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, electricity: e.target.value } }))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 min-w-0"
+                      />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="shrink-0 pb-1">Road:</span>
+                      <input
+                        type="text"
+                        value={formData.farmAtAGlance.road}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, road: e.target.value } }))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 min-w-0"
+                      />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="shrink-0 pb-1">Market Distance:</span>
+                      <input
+                        type="text"
+                        value={formData.farmAtAGlance.marketDistance}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, marketDistance: e.target.value } }))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 min-w-0"
+                      />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="shrink-0 pb-1">Security:</span>
+                      <input
+                        type="text"
+                        value={formData.farmAtAGlance.security}
+                        onChange={(e) => setFormData(prev => ({ ...prev, farmAtAGlance: { ...prev.farmAtAGlance, security: e.target.value } }))}
+                        className="flex-1 border-b-2 border-sridasi-forest/40 bg-transparent focus:outline-none focus:border-sridasi-forest px-1 py-0.5 min-w-0"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
                 </>
@@ -1890,8 +1934,8 @@ export function TrainingRegistrationForm() {
                       {errors.declarationAccepted && <p className="text-[10px] text-red-600 mt-1 font-medium not-italic">{errors.declarationAccepted}</p>}
                     </div>
                   </label>
-                  <div className="flex justify-between gap-8">
-                    <div className="w-1/2 flex flex-col gap-1">
+                  <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-8 mt-4">
+                    <div className="w-full sm:w-1/2 flex flex-col gap-1">
                       <label className="text-[10px] text-sridasi-neutral-500 font-bold">Buyer Signature <span className="text-red-500">*</span></label>
                       <input 
                         type="text" 
@@ -1902,7 +1946,7 @@ export function TrainingRegistrationForm() {
                       />
                       {errors.buyerSignature && <p className="text-[10px] text-red-600 font-medium">{errors.buyerSignature}</p>}
                     </div>
-                    <div className="w-1/3 flex flex-col gap-1">
+                    <div className="w-full sm:w-1/3 flex flex-col gap-1">
                       <label className="text-[10px] text-sridasi-neutral-500 font-bold">Date <span className="text-red-500">*</span></label>
                       <CustomDatePicker
                         value={formData.buyerSignatureDate || ''}
@@ -1915,7 +1959,7 @@ export function TrainingRegistrationForm() {
                 </div>
                 <div className="mt-8 p-4 border-2 border-sridasi-neutral-300 rounded-xl bg-sridasi-neutral-50">
                   <h4 className="font-bold text-sridasi-forest mb-4 uppercase text-center border-b pb-2 border-sridasi-neutral-200">For Farm Use</h4>
-                  <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4 text-xs">
                     <div className="flex flex-col gap-1">
                       <label className="font-semibold text-sridasi-neutral-700">Buyer ID:</label> 
                       <input type="text" disabled className="border border-sridasi-neutral-300 bg-sridasi-neutral-200/60 rounded px-2 py-1.5 w-full max-w-[200px] cursor-not-allowed text-sridasi-neutral-500" />
@@ -1930,7 +1974,7 @@ export function TrainingRegistrationForm() {
                     </div>
                     <div className="flex flex-col gap-2 justify-center">
                       <span className="font-semibold text-sridasi-neutral-700">Lead Type:</span> 
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
                         <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Retail</label>
                         <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> B2B</label>
                         <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Wholesale</label>
@@ -1940,9 +1984,9 @@ export function TrainingRegistrationForm() {
                       <label className="font-semibold text-sridasi-neutral-700">Follow-up Date:</label> 
                       <CustomDatePicker disabled className="border border-sridasi-neutral-300 bg-sridasi-neutral-200/60 rounded px-2 py-1.5 w-full max-w-[200px] cursor-not-allowed text-sridasi-neutral-500" />
                     </div>
-                    <div className="flex flex-col gap-2 justify-center col-span-2">
+                    <div className="flex flex-col gap-2 justify-center sm:col-span-2">
                       <span className="font-semibold text-sridasi-neutral-700">Status:</span> 
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
                         <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> New</label>
                         <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Follow-up</label>
                         <label className="flex items-center gap-1 text-sridasi-neutral-500"><input type="checkbox" disabled className="rounded cursor-not-allowed" /> Converted</label>
